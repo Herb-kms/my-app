@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 // 1. 메인 로비 컴포넌트
 export function Lobby({ onStart }) {
