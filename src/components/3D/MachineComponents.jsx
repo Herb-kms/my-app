@@ -313,84 +313,65 @@ export function Machine({ placedMachines = [], movingItems = [] }) {
                         {cfg.type === 'PACKAGING' && <PackagingMachine isActive={isActive} />}
                         {cfg.type === 'SHIPPING_BIN' && <ShippingBin position={[0, 0, 0]} />}
 
-                        {/* ── 입구 / 출구 공통 터널 가이드 ──────────────── */}
-                        <Box args={[1.8, 0.6, 0.18]} position={[0, 0.55, 1.5]}>
-                            <meshStandardMaterial color="#444" metalness={0.8} />
-                        </Box>
-                        <Box args={[1.8, 0.6, 0.18]} position={[0, 0.55, -1.5]}>
-                            <meshStandardMaterial color="#444" metalness={0.8} />
-                        </Box>
-
-                        {/* ── 좌측 측면 모니터 암 부착형 전광판 ──────── */}
-                        <group position={[-1.9, 1.8, 0.6]} rotation={[0, Math.PI / 12, 0]} scale={0.5}>
-                            {/* 기계 본체(왼쪽 면)와 연결되는 두꺼운 모니터 암 */}
-                            <Box args={[1.6, 0.2, 0.2]} position={[0.8, 0, -0.1]}>
-                                <meshStandardMaterial color="#222" metalness={0.8} />
-                            </Box>
-                            {/* 암 관절 포인트 장식 */}
-                            <mesh position={[0, 0, -0.1]}>
-                                <cylinderGeometry args={[0.2, 0.2, 0.3, 16]} />
-                                <meshStandardMaterial color="#111" />
-                            </mesh>
-
-                            {/* 전광판 철제 프레임 */}
-                            <Box args={[2.2, 1.2, 0.2]} position={[0, 0.5, 0]}>
-                                <meshStandardMaterial color="#222" metalness={0.8} roughness={0.6} />
-                            </Box>
-                            
-                            {/* 프로그레스 바 (가운데 하단) */}
-                            <Box args={[1.8, 0.2, 0.05]} position={[0, 0.15, 0.11]}>
-                                <meshStandardMaterial color="#000" />
-                            </Box>
-                            {isActive && (
-                                <Box
-                                    args={[1.7 * (progress / 100), 0.1, 0.06]}
-                                    position={[(-0.85 + 0.85 * (progress / 100)), 0.15, 0.12]}
-                                >
-                                    <meshStandardMaterial color="#00ffcc" emissive="#00ffcc" emissiveIntensity={2} />
+                        {/* ── 입구 / 출구 공통 터널 가이드 (판매존 제외) ────────── */}
+                        {cfg.type !== 'SHIPPING_BIN' && (
+                            <>
+                                <Box args={[1.8, 0.6, 0.18]} position={[0, 0.55, 1.5]}>
+                                    <meshStandardMaterial color="#444" metalness={0.8} />
                                 </Box>
-                            )}
+                                <Box args={[1.8, 0.6, 0.18]} position={[0, 0.55, -1.5]}>
+                                    <meshStandardMaterial color="#444" metalness={0.8} />
+                                </Box>
+                            </>
+                        )}
 
-                            {/* 아날로그 게이지 계기판 (왼쪽) */}
-                            <group position={[-0.6, 0.7, 0.11]}>
-                                <mesh>
-                                    <circleGeometry args={[0.22, 32]} />
-                                    <meshStandardMaterial color="#ddd" />
+                        {/* ── 좌측 측면 모니터 암 부착형 전광판 (판매존 제외) ──────── */}
+                        {cfg.type !== 'SHIPPING_BIN' && (
+                            <group position={[-1.9, 1.8, 0.6]} rotation={[0, Math.PI / 12, 0]} scale={0.5}>
+                                <Box args={[1.6, 0.2, 0.2]} position={[0.8, 0, -0.1]}>
+                                    <meshStandardMaterial color="#222" metalness={0.8} />
+                                </Box>
+                                <mesh position={[0, 0, -0.1]}>
+                                    <cylinderGeometry args={[0.2, 0.2, 0.3, 16]} />
+                                    <meshStandardMaterial color="#111" />
                                 </mesh>
-                                {/* 게이지 눈금 (장식용 반원) */}
-                                <mesh position={[0, 0, 0.01]}>
-                                    <ringGeometry args={[0.16, 0.2, 16, 1, 0, Math.PI]} />
-                                    <meshBasicMaterial color="#333" />
-                                </mesh>
-                                {/* 바늘 */}
-                                <group rotation={[0, 0, Math.PI - (isActive ? (progress / 100) * Math.PI : 0)]}>
-                                    <Box args={[0.18, 0.03, 0.02]} position={[0.09, 0, 0.02]}>
-                                        <meshStandardMaterial color="red" />
+                                <Box args={[2.2, 1.2, 0.2]} position={[0, 0.5, 0]}>
+                                    <meshStandardMaterial color="#222" metalness={0.8} roughness={0.6} />
+                                </Box>
+                                <Box args={[1.8, 0.2, 0.05]} position={[0, 0.15, 0.11]}>
+                                    <meshStandardMaterial color="#000" />
+                                </Box>
+                                {isActive && (
+                                    <Box
+                                        args={[1.7 * (progress / 100), 0.1, 0.06]}
+                                        position={[(-0.85 + 0.85 * (progress / 100)), 0.15, 0.12]}
+                                    >
+                                        <meshStandardMaterial color="#00ffcc" emissive="#00ffcc" emissiveIntensity={2} />
                                     </Box>
+                                )}
+                                <group position={[-0.6, 0.7, 0.11]}>
+                                    <mesh>
+                                        <circleGeometry args={[0.22, 32]} />
+                                        <meshStandardMaterial color="#ddd" />
+                                    </mesh>
+                                    <mesh position={[0, 0, 0.01]}>
+                                        <ringGeometry args={[0.16, 0.2, 16, 1, 0, Math.PI]} />
+                                        <meshBasicMaterial color="#333" />
+                                    </mesh>
+                                    <group rotation={[0, 0, Math.PI - (isActive ? (progress / 100) * Math.PI : 0)]}>
+                                        <Box args={[0.18, 0.03, 0.02]} position={[0.09, 0, 0.02]}>
+                                            <meshStandardMaterial color="red" />
+                                        </Box>
+                                    </group>
                                 </group>
+                                <Text position={[0.2, 0.7, 0.12]} fontSize={0.35} color="white" maxWidth={1.2} textAlign="center" fontWeight="bold">
+                                    {cfg.type}
+                                </Text>
+                                <Box args={[0.15, 0.15, 0.1]} position={[0.9, 0.95, 0.1]}>
+                                    <meshStandardMaterial color={isActive ? '#00ff00' : '#444'} emissive={isActive ? '#00ff00' : 'black'} emissiveIntensity={isActive ? 1.5 : 0} />
+                                </Box>
                             </group>
-
-                            {/* 기계 타입 이름표 (가운데~오른쪽) */}
-                            <Text
-                                position={[0.2, 0.7, 0.12]}
-                                fontSize={0.35}
-                                color="white"
-                                maxWidth={1.2}
-                                textAlign="center"
-                                fontWeight="bold"
-                            >
-                                {cfg.type}
-                            </Text>
-
-                            {/* 작동 상태등 (우측 상단) */}
-                            <Box args={[0.15, 0.15, 0.1]} position={[0.9, 0.95, 0.1]}>
-                                <meshStandardMaterial
-                                    color={isActive ? '#00ff00' : '#444'}
-                                    emissive={isActive ? '#00ff00' : 'black'}
-                                    emissiveIntensity={isActive ? 1.5 : 0}
-                                />
-                            </Box>
-                        </group>
+                        )}
                     </group>
                 );
             })}

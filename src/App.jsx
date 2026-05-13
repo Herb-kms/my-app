@@ -437,6 +437,14 @@ function GameContent() {
                         const m = placedMachines.find(m => m.id === item.machineId);
                         if (!m) return { ...item, status: 'MOVING' }; // machine deleted by user somehow
 
+                        // 예외 처리: 만약 기계가 판매 구역(SHIPPING_BIN)이라면 여기서도 즉시 판매
+                        if (m.type === 'SHIPPING_BIN') {
+                            const val = item.value || 10;
+                            setMoney(prev => prev + val);
+                            setResults(prev => [`SOLD: ${item.name || item.type} for $${val}`, ...prev].slice(0, 5));
+                            return null;
+                        }
+
                         const speedFactor = 0.5;
                         const newProg = item.machineProgress + (0.4 * speedFactor * 10);
                         if (newProg >= 100) {
