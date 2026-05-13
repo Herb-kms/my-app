@@ -69,10 +69,15 @@ export function HUD({
                     <button className="quit-button" onClick={() => setGameState('lobby')}>QUIT TO LOBBY</button>
                 </div>
                 <div className="controls-hint">
-                    <span className="kb-key">B</span> BUILD MODE
+                    <span className="kb-key">WASD</span> MOVE
+                    <span className="kb-key">SPACE</span> JUMP
+                    <span className="kb-key">F5</span> {`${buildMode ? 'BUILD' : (isInventoryOpen ? 'STORAGE' : 'VIEW')}`} |
+                    <span className="kb-key">B</span> BUILD
                     <span className="kb-key">ESC</span> SETTINGS
-                    <span className="kb-key">V</span> VIEW
+                    <span className="kb-key">V</span> CATALOG
                     <span className="kb-key">TAB</span> STORAGE
+                    <span className="kb-key">F</span> PICKUP
+                    <span className="kb-key">G</span> DROP
                 </div>
             </header>
 

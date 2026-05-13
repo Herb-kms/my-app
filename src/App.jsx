@@ -141,6 +141,15 @@ function GameContent() {
                 else setIsSettingsOpen(prev => !prev);
                 return;
             }
+            // F5: 1인칭 / 3인칭 전환
+            if (e.code === 'F5') {
+                e.preventDefault();
+                setSettings(prev => ({
+                    ...prev,
+                    perspective: prev.perspective === 'first' ? 'third' : 'first'
+                }));
+                return;
+            }
             if (e.code === 'KeyB') setBuildMode(prev => !prev);
             if (e.code === 'Tab' || e.code === 'KeyI') { e.preventDefault(); setIsInventoryOpen(prev => !prev); }
             if (e.code === 'KeyV') setIsBuildInventoryOpen(prev => !prev);
@@ -238,6 +247,9 @@ function GameContent() {
                     handleUnlock={handleUnlock}
                     onPlaceItem={handlePlaceItem}
                     onDemolishItem={handleDemolishItem}
+                    isInventoryOpen={isInventoryOpen}
+                    isSettingsOpen={isSettingsOpen}
+                    isBuildInventoryOpen={isBuildInventoryOpen}
                 />
             )}
 

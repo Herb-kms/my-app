@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { PerspectiveCamera, Sky, Stars, ContactShadows, Environment } from '@react-three/drei';
+import { KeyboardControls, PerspectiveCamera, Sky, Stars, ContactShadows, Environment, PointerLockControls } from '@react-three/drei';
 import { Physics } from '@react-three/cannon';
 
 import { Machine, ConveyorBelt } from './MachineComponents';
@@ -8,6 +8,15 @@ import { TrashItem } from './ItemComponents';
 import { Floor, PropComponents } from './EnvironmentComponents';
 import { BuilderController } from './BuilderComponents';
 import { Player, PlayerController, FirstPersonHeldItem } from './PlayerComponents';
+
+// KeyboardControls 키 맵핑
+const keyMap = [
+    { name: 'forward',  keys: ['ArrowUp',    'KeyW'] },
+    { name: 'backward', keys: ['ArrowDown',  'KeyS'] },
+    { name: 'left',     keys: ['ArrowLeft',  'KeyA'] },
+    { name: 'right',    keys: ['ArrowRight', 'KeyD'] },
+    { name: 'jump',     keys: ['Space'] },
+];
 
 export function GameScene({
     settings,
@@ -24,64 +33,87 @@ export function GameScene({
     canLock,
     handleUnlock,
     onPlaceItem,
-    onDemolishItem
+    onDemolishItem,
+    isInventoryOpen,
+    isSettingsOpen,
+    isBuildInventoryOpen,
 }) {
+    const isUIOpen = isInventoryOpen || isSettingsOpen || isBuildInventoryOpen;
+
     return (
-        <Canvas shadows gl={{ antialias: true }}>
-            <PerspectiveCamera
-                makeDefault
-                position={[12, 5, 12]}
-                fov={settings.perspective === 'first' ? 75 : 50}
-            />
-            
-            <Sky sunPosition={[100, 20, 100]} />
-            <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
-            <Environment preset="city" />
-            <ambientLight intensity={0.5} />
-            <pointLight position={[10, 10, 10]} intensity={1.5} castShadow />
+        <KeyboardControls map={keyMap}>
+            <Canvas shadows gl={{ antialias: true }}>
+                {/* FOV는 1인칭/3인칭에 따라 다름 */}
+                <PerspectiveCamera
+                    makeDefault
+                    position={[12, 5, 12]}
+                    fov={settings.perspective === 'first' ? 80 : 60}
+                    near={0.05}
+                    far={1000}
+                />
 
-            <Suspense fallback={null}>
-                <Physics gravity={[0, -9.81, 0]}>
-                    <Floor />
-                    <PropComponents placedProps={placedProps} />
-                    
-                    {/* 설치된 벨트 및 기계 렌더링 */}
-                    <ConveyorBelt placedBelts={placedBelts} />
-                    <Machine placedMachines={placedMachines} movingItems={movingItems} />
-                    
-                    {/* 플레이어 및 아이템 */}
-                    <Player playerRef={playerRef} perspective={settings.perspective} selectedItem={selectedItem} />
-                    <PlayerController 
-                        playerRef={playerRef} 
-                        playerPositionRef={playerPositionRef}
-                        perspective={settings.perspective} 
-                        buildMode={buildMode} 
-                    />
-                    <FirstPersonHeldItem item={selectedItem} perspective={settings.perspective} />
-                    
-                    {/* 필드 아이템 렌더링 */}
-                    {items.map(item => (
-                        <TrashItem key={item.id} item={item} isHandFull={isHandFull} />
-                    ))}
-                    
-                    {/* 이동 중인 아이템 렌더링 */}
-                    {movingItems.map(item => (
-                        item.status === 'MOVING' && <TrashItem key={item.id} item={item} isHandFull={isHandFull} />
-                    ))}
-                    
-                    <BuilderController 
-                        buildMode={buildMode}
-                        selectedBuildItem={selectedItem}
-                        playerRef={playerRef}
-                        onPlaceItem={onPlaceItem}
-                        onDemolishItem={onDemolishItem}
-                        onUnlock={handleUnlock}
-                        canLock={canLock}
-                    />
-                </Physics>
-            </Suspense>
+                <Sky sunPosition={[100, 20, 100]} />
+                <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
+                <Environment preset="city" />
+                <ambientLight intensity={0.5} />
+                <pointLight position={[10, 10, 10]} intensity={1.5} castShadow />
 
-            <ContactShadows position={[0, 0, 0]} opacity={0.4} scale={40} blur={2} far={4.5} />
-        </Canvas>
+                <Suspense fallback={null}>
+                    <Physics gravity={[0, -9.81, 0]}>
+                        <Floor />
+                        <PropComponents placedProps={placedProps} />
+
+                        {/* 벨트 및 기계 */}
+                        <ConveyorBelt placedBelts={placedBelts} />
+                        <Machine placedMachines={placedMachines} movingItems={movingItems} />
+
+                        {/* 플레이어 */}
+                        <Player
+                            playerRef={playerRef}
+                            perspective={settings.perspective}
+                            selectedItem={selectedItem}
+                        />
+                        <PlayerController
+                            playerRef={playerRef}
+                            playerPositionRef={playerPositionRef}
+                            perspective={settings.perspective}
+                            zoom={settings.zoom}
+                            sensitivity={settings.sensitivity}
+                            buildMode={buildMode}
+                            isUIOpen={isUIOpen}
+                        />
+                        <FirstPersonHeldItem item={selectedItem} perspective={settings.perspective} />
+
+                        {/* 필드 아이템 */}
+                        {items.map(item => (
+                            <TrashItem key={item.id} item={item} isHandFull={isHandFull} />
+                        ))}
+
+                        {/* 이동 중인 아이템 */}
+                        {movingItems.map(item => (
+                            item.status === 'MOVING' && (
+                                <TrashItem key={item.id} item={item} isHandFull={isHandFull} />
+                            )
+                        ))}
+
+                        {/* 건설 컨트롤러 */}
+                        <BuilderController
+                            buildMode={buildMode}
+                            selectedBuildItem={selectedItem}
+                            playerRef={playerRef}
+                            onPlaceItem={onPlaceItem}
+                            onDemolishItem={onDemolishItem}
+                        />
+                    </Physics>
+                </Suspense>
+
+                <ContactShadows position={[0, 0, 0]} opacity={0.4} scale={40} blur={2} far={4.5} />
+
+                {/* 포인터 락 - UI가 열려있지 않을 때만 활성화 */}
+                {canLock && !isUIOpen && (
+                    <PointerLockControls onUnlock={handleUnlock} />
+                )}
+            </Canvas>
+        </KeyboardControls>
     );
 }
