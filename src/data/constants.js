@@ -9,8 +9,8 @@ export const INITIAL_ITEMS = [
 ];
 
 export const DEFAULT_MACHINES = [
-    { id: 'm1', type: 'SHREDDING', position: [0, 0, 0], rotation: 0 },
-    { id: 'm2', type: 'WASHING', position: [0, 0, -5], rotation: 0 },
+    { id: 'm1', type: 'CRUSHING', position: [0, 0, 0], rotation: 0 },
+    { id: 'm2', type: 'CLEANING', position: [0, 0, -5], rotation: 0 },
     { id: 'm3', type: 'SORTING', position: [5, 0, -5], rotation: Math.PI / 2 },
     { id: 'm4', type: 'PACKAGING', position: [10, 0, -5], rotation: Math.PI },
     { id: 'm5', type: 'SHIPPING_BIN', position: [10, 0, 0], rotation: Math.PI },

@@ -7,6 +7,7 @@ import { Machine, ConveyorBelt } from './MachineComponents';
 import { TrashItem } from './ItemComponents';
 import { Floor, ShippingBin, PropComponents } from './EnvironmentComponents';
 import { BuilderController } from './BuilderComponents';
+import { Player, PlayerController, FirstPersonHeldItem } from './PlayerComponents';
 
 export function GameScene({
     settings,
@@ -47,6 +48,11 @@ export function GameScene({
                     {/* 설치된 벨트 및 기계 렌더링 */}
                     <ConveyorBelt placedBelts={placedBelts} />
                     <Machine machines={placedMachines} movingItems={movingItems} />
+                    
+                    {/* 플레이어 및 아이템 */}
+                    <Player playerRef={playerRef} perspective={settings.perspective} selectedItem={selectedItem} />
+                    <PlayerController playerRef={playerRef} perspective={settings.perspective} buildMode={buildMode} />
+                    <FirstPersonHeldItem item={selectedItem} perspective={settings.perspective} />
                     
                     {/* 필드 아이템 렌더링 */}
                     {items.map(item => (
