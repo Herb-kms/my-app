@@ -207,7 +207,14 @@ function GameContent() {
     const [movingItems, setMovingItems] = useState([]);
     const [results, setResults] = useState([]);
     const [isInventoryOpen, setIsInventoryOpen] = useState(false);
+    const [canLock, setCanLock] = useState(true);
     const playerRef = useRef();
+
+    // 마우스 잠금 해제 시 쿨타임 적용 (브라우저 에러 방지)
+    const handleUnlock = () => {
+        setCanLock(false);
+        setTimeout(() => setCanLock(true), 1200); // 1.2초 후 다시 잠금 가능
+    };
 
     // 메인 HUD 정보 호환용 (첫 번째로 처리 중인 아이템 기준)
     const activeProcessingItem = movingItems.find(i => i.status === 'PROCESSING');
@@ -539,8 +546,8 @@ function GameContent() {
                     <ContactShadows position={[0, 0, 0]} opacity={0.4} scale={40} blur={2} far={4.5} />
                 )}
 
-                {!isInventoryOpen && !isSettingsOpen && gameState === 'playing' && (
-                    <PointerLockControls />
+                {canLock && !isInventoryOpen && !isSettingsOpen && !isBuildInventoryOpen && gameState === 'playing' && (
+                    <PointerLockControls onUnlock={handleUnlock} />
                 )}
             </Canvas>
 
