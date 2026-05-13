@@ -60,12 +60,12 @@ export function GameScene({
                     
                     {/* 필드 아이템 렌더링 */}
                     {items.map(item => (
-                        <TrashItem key={item.id} item={item} />
+                        <TrashItem key={item.id} item={item} isHandFull={isHandFull} />
                     ))}
                     
                     {/* 이동 중인 아이템 렌더링 */}
                     {movingItems.map(item => (
-                        item.status === 'MOVING' && <TrashItem key={item.id} item={item} />
+                        item.status === 'MOVING' && <TrashItem key={item.id} item={item} isHandFull={isHandFull} />
                     ))}
                     
                     <BuilderController 

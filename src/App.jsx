@@ -53,6 +53,7 @@ function GameContent() {
     const playerPositionRef = useRef([12, 0, 12]);
     const currentInventory = buildMode ? buildInventory : normalInventory;
     const selectedItem = currentInventory[activeHotbarSlot - 1];
+    const isHandFull = currentInventory.filter(slot => slot !== null).length >= 16;
 
     // 2. 시뮬레이션 및 HUD 정보
     useEffect(() => { movingItemsRef.current = movingItems; }, [movingItems]);
@@ -223,6 +224,7 @@ function GameContent() {
                     placedBelts={placedBelts}
                     placedProps={placedProps}
                     buildMode={buildMode}
+                    isHandFull={isHandFull}
                     selectedItem={selectedItem}
                     playerRef={playerRef}
                     playerPositionRef={playerPositionRef}

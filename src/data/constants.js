@@ -1,11 +1,14 @@
 import * as THREE from 'three';
 
 export const INITIAL_ITEMS = [
-    { id: 't1', type: 'Can', position: [5, 0.5, 5], status: 'IDLE', value: 10 },
-    { id: 't2', type: 'Plastic', position: [7, 0.5, 5], status: 'IDLE', value: 8 },
-    { id: 't3', type: 'Glass', position: [9, 0.5, 5], status: 'IDLE', value: 5 },
-    { id: 't4', type: 'Can', position: [5, 0.5, 7], status: 'IDLE', value: 10 },
-    { id: 't5', type: 'Plastic', position: [7, 0.5, 7], status: 'IDLE', value: 8 },
+    { id: 't1', type: 'Can', position: [5, 0.5, 5], status: 'IDLE', value: 10, color: '#ff4444' },
+    { id: 't2', type: 'Plastic', position: [7, 0.5, 5], status: 'IDLE', value: 8, color: '#4444ff' },
+    { id: 't3', type: 'Glass', position: [9, 0.5, 5], status: 'IDLE', value: 5, color: '#44ff44' },
+    { id: 't4', type: 'Can', position: [5, 0.5, 7], status: 'IDLE', value: 10, color: '#ff4444' },
+    { id: 't5', type: 'Plastic', position: [7, 0.5, 7], status: 'IDLE', value: 8, color: '#4444ff' },
+    { id: 't6', type: 'Glass', position: [9, 0.5, 7], status: 'IDLE', value: 5, color: '#44ff44' },
+    { id: 't7', type: 'Can', position: [5, 0.5, 9], status: 'IDLE', value: 10, color: '#ff4444' },
+    { id: 't8', type: 'Plastic', position: [7, 0.5, 9], status: 'IDLE', value: 8, color: '#4444ff' },
 ];
 
 export const DEFAULT_MACHINES = [
@@ -24,9 +27,26 @@ export const DEFAULT_BELTS = [
     { id: 'b5', position: [10, 0, -2.5], rotation: Math.PI },
 ];
 
+export const BUILD_CATALOG = [
+    { id: 'CONVEYOR', name: 'Conveyor Belt', category: 'Logic' },
+    { id: 'SORTING', name: 'Sorting Machine', category: 'Machine' },
+    { id: 'CRUSHING', name: 'Crushing Machine', category: 'Machine' },
+    { id: 'CLEANING', name: 'Cleaning Machine', category: 'Machine' },
+    { id: 'DRYING', name: 'Drying Machine', category: 'Machine' },
+    { id: 'PACKAGING', name: 'Packaging Machine', category: 'Machine' },
+    { id: 'SHIPPING_BIN', name: 'Sell Zone', category: 'Machine' },
+    { id: 'WALL', name: 'Factory Wall', category: 'Structure' },
+    { id: 'SHELF', name: 'Industrial Shelf', category: 'Prop' },
+    { id: 'CRATE', name: 'Wooden Crate', category: 'Prop' },
+    { id: 'BARREL', name: 'Oil Barrel', category: 'Prop' },
+    { id: 'ITEM_PLASTIC', name: 'Plastic Waste', category: 'Resource' },
+    { id: 'ITEM_CAN', name: 'Alu Can Waste', category: 'Resource' },
+    { id: 'ITEM_GLASS', name: 'Glass Waste', category: 'Resource' },
+];
+
 export const MACHINE_CONFIGS = {
-    SHREDDING: { color: '#ff4444', label: 'SHREDDER' },
-    WASHING: { color: '#4444ff', label: 'WASHER' },
+    CRUSHING: { color: '#ff4444', label: 'CRUSHER' },
+    CLEANING: { color: '#4444ff', label: 'CLEANER' },
     SORTING: { color: '#44ff44', label: 'SORTER' },
     PACKAGING: { color: '#ffcc00', label: 'PACKAGER' },
     SHIPPING_BIN: { color: '#888888', label: 'SELL ZONE' }
