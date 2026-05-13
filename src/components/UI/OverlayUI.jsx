@@ -32,6 +32,8 @@ export function OverlayUI({
     return (
         <>
             <HUD
+                gameState={gameState}
+                setGameState={setGameState}
                 money={money}
                 results={results}
                 isInventoryOpen={isInventoryOpen}
@@ -39,7 +41,7 @@ export function OverlayUI({
                 isBuildInventoryOpen={isBuildInventoryOpen}
                 buildMode={buildMode}
                 inventory={currentInventory}
-                activeSlot={activeHotbarSlot}
+                activeHotbarSlot={activeHotbarSlot}
                 onToggleSettings={() => setIsSettingsOpen(!isSettingsOpen)}
                 onToggleInventory={() => setIsInventoryOpen(!isInventoryOpen)}
                 onToggleBuildInventory={() => setIsBuildInventoryOpen(!isBuildInventoryOpen)}

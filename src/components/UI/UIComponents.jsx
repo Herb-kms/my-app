@@ -66,7 +66,7 @@ export function HUD({
                         <span style={{ fontSize: '12px', opacity: 0.6 }}>BALANCE</span>
                         <span style={{ color: '#4caf50', fontWeight: '900', fontSize: '20px' }}>${money.toLocaleString()}</span>
                     </div>
-                    <button className="quit-button" onClick={() => setGameState('start')}>QUIT TO LOBBY</button>
+                    <button className="quit-button" onClick={() => setGameState('lobby')}>QUIT TO LOBBY</button>
                 </div>
                 <div className="controls-hint">
                     <span className="kb-key">B</span> BUILD MODE
