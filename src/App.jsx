@@ -589,8 +589,10 @@ function GameContent() {
             <BuildInventory
                 isOpen={isBuildInventoryOpen}
                 onClose={() => setIsBuildInventoryOpen(false)}
+                inventory={buildInventory}
+                activeHotbarSlot={activeHotbarSlot}
+                onSlotClick={(idx) => setActiveHotbarSlot(idx + 1)}
                 onSelectItem={(itemId) => {
-                    // Find the item in BUILD_CATALOG
                     const targetItem = BUILD_CATALOG.find(item => item.id === itemId);
                     if (targetItem) {
                         const newInv = [...buildInventory];
@@ -598,7 +600,6 @@ function GameContent() {
                         setBuildInventory(newInv);
                     }
                     setBuildMode(true);
-                    setIsBuildInventoryOpen(false);
                 }}
             />
         </div>

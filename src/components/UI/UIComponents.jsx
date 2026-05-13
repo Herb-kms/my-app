@@ -301,40 +301,71 @@ export const BUILD_CATALOG = [
     { id: "ITEM_GLASS", name: "Glass Trash", category: "Items", icon: "🍾", color: "#88ff44" },
 ];
 
-export function BuildInventory({ isOpen, onClose, onSelectItem }) {
+export function BuildInventory({ isOpen, onClose, onSelectItem, inventory, activeHotbarSlot, onSlotClick }) {
     if (!isOpen) return null;
     return (
         <div className="inventory-full-overlay">
-            <div className="storage-grid glass-panel">
+            <div className="storage-grid glass-panel" style={{ width: '800px', height: 'auto', maxHeight: '90vh' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                    <h2 style={{ margin: 0, letterSpacing: '4px' }}>BUILD CATALOG</h2>
+                    <div>
+                        <h2 style={{ margin: 0, letterSpacing: '4px' }}>BUILD CATALOG</h2>
+                        <p style={{ margin: '5px 0 0 0', fontSize: '12px', opacity: 0.5 }}>Select an item to equip to slot {activeHotbarSlot}</p>
+                    </div>
                     <button onClick={onClose} style={{ background: 'none', color: '#ff4444', border: 'none', fontSize: '20px', cursor: 'pointer' }}>✖</button>
                 </div>
                 
-                <div className="grid-layout">
-                    {[...Array(16)].map((_, i) => {
-                        const item = BUILD_CATALOG[i];
-                        return (
+                {/* Catalog Section */}
+                <div style={{ marginBottom: '30px' }}>
+                    <div className="inventory-title">AVAILABLE ITEMS</div>
+                    <div className="grid-layout" style={{ gridTemplateColumns: 'repeat(7, 1fr)', gap: '10px' }}>
+                        {BUILD_CATALOG.map(item => (
                             <div
-                                key={i}
+                                key={item.id}
                                 className="grid-slot"
-                                onClick={() => item && onSelectItem(item.id)}
-                                style={{ borderColor: item ? 'rgba(0, 255, 204, 0.4)' : undefined }}
+                                onClick={() => onSelectItem(item.id)}
+                                style={{ height: '70px', cursor: 'pointer' }}
                             >
-                                {item ? (
+                                <div className="item-preview">
+                                    <span style={{ fontSize: '20px' }}>{item.icon}</span>
+                                    <span style={{ fontSize: '9px', textAlign: 'center' }}>{item.name}</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Current Inventory Section */}
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}>
+                    <div className="inventory-title">YOUR SLOTS (ACTIVE: {activeHotbarSlot})</div>
+                    <div className="grid-layout" style={{ gridTemplateColumns: 'repeat(8, 1fr)', gap: '10px' }}>
+                        {[...Array(16)].map((_, i) => (
+                            <div
+                                key={`build-inv-${i}`}
+                                className={`grid-slot ${activeHotbarSlot === i + 1 ? 'active' : ''}`}
+                                onClick={() => onSlotClick && onSlotClick(i)}
+                                style={{ 
+                                    height: '70px',
+                                    cursor: 'pointer',
+                                    border: i < 8 ? '2px solid rgba(0, 255, 204, 0.3)' : '1px solid rgba(255,255,255,0.1)',
+                                    background: activeHotbarSlot === i + 1 ? 'rgba(0, 255, 204, 0.1)' : undefined
+                                }}
+                            >
+                                {inventory && inventory[i] ? (
                                     <div className="item-preview">
-                                        <span style={{ fontSize: '24px' }}>{item.icon}</span>
-                                        <span>{item.name}</span>
-                                        <span style={{ fontSize: '9px', opacity: 0.5 }}>{item.category}</span>
+                                        <span style={{ fontSize: '20px' }}>{inventory[i].icon}</span>
+                                        <span style={{ fontSize: '8px' }}>{inventory[i].name}</span>
                                     </div>
                                 ) : (
-                                    <span style={{ opacity: 0.1, fontSize: '24px' }}>+</span>
+                                    <span style={{ opacity: 0.2 }}>{i < 8 ? i + 1 : ''}</span>
                                 )}
                             </div>
-                        );
-                    })}
+                        ))}
+                    </div>
                 </div>
-                <div className="close-hint">CLICK TO EQUIP • V TO CLOSE</div>
+
+                <div className="close-hint" style={{ marginTop: '20px' }}>
+                    CLICK A SLOT BELOW TO CHOOSE, THEN CLICK ITEM ABOVE TO EQUIP • V TO CLOSE
+                </div>
             </div>
         </div>
     );
