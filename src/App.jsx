@@ -18,7 +18,7 @@ import { ConveyorBelt, Machine } from './components/3D/MachineComponents';
 import { TrashItem } from './components/3D/ItemComponents';
 import { Floor, ShippingBin, PropComponents } from './components/3D/EnvironmentComponents';
 import { BuilderController } from './components/3D/BuilderComponents';
-import { Lobby, HUD, SettingsMenu, BuildInventory, BUILD_CATALOG } from './components/UI/UIComponents';
+import { Lobby, HUD, SettingsMenu, BuildInventory, IntroTutorial, BUILD_CATALOG } from './components/UI/UIComponents';
 
 // 1인칭/3인칭 이동 및 카메라 컨트롤러
 function PlayerController({
