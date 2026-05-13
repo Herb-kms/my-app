@@ -371,6 +371,9 @@ function GameContent() {
     useEffect(() => {
         if (gameState !== 'playing') return;
         const interval = setInterval(() => {
+            let soldAmount = 0; // 이번 틱에서 판매된 금액 합계
+            let salesLog = [];
+
             setMovingItems(prevItems => {
                 let changed = false;
                 const nextItems = prevItems.map(item => {
@@ -382,13 +385,11 @@ function GameContent() {
                         // Check Machine (기계 및 판매 구역 감지)
                         const machine = placedMachines.find(m => Math.abs(m.position[0] - gridX) < 1.2 && Math.abs(m.position[2] - gridZ) < 1.2);
                         if (machine) {
-                            // 판매 구역(SHIPPING_BIN)일 경우: 모든 아이템 즉시 판매
                             if (machine.type === 'SHIPPING_BIN') {
-                                const val = item.value || 10; // 제품이 아니면 기본값 10원
-                                setMoney(prev => prev + val);
-                                setResults(prev => [`SOLD: ${item.name || item.type} for $${val}`, ...prev].slice(0, 5));
-                                changed = true;
-                                return null; // 벨트 및 시뮬레이션에서 즉시 제거
+                                const val = item.value || 10;
+                                soldAmount += val;
+                                salesLog.push(`SOLD: ${item.name || item.type} for $${val}`);
+                                return null;
                             }
                             return { ...item, status: 'PROCESSING', machineId: machine.id, machineProgress: 0 };
                         }
@@ -440,8 +441,8 @@ function GameContent() {
                         // 예외 처리: 만약 기계가 판매 구역(SHIPPING_BIN)이라면 여기서도 즉시 판매
                         if (m.type === 'SHIPPING_BIN') {
                             const val = item.value || 10;
-                            setMoney(prev => prev + val);
-                            setResults(prev => [`SOLD: ${item.name || item.type} for $${val}`, ...prev].slice(0, 5));
+                            soldAmount += val;
+                            salesLog.push(`SOLD: ${item.name || item.type} for $${val}`);
                             return null;
                         }
 
@@ -484,6 +485,13 @@ function GameContent() {
                     }
                     return item; // IDLE status
                 });
+
+                // 판매 내역이 있으면 돈과 로그 업데이트
+                if (soldAmount > 0) {
+                    setMoney(m => m + soldAmount);
+                    setResults(r => [...salesLog, ...r].slice(0, 5));
+                }
+
                 return changed ? nextItems.filter(Boolean) : prevItems;
             });
         }, 50);
