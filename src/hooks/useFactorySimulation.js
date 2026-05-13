@@ -28,7 +28,8 @@ export function useFactorySimulation({
                     const gridX = Math.round(item.position[0] / 2.5) * 2.5;
                     const gridZ = Math.round(item.position[2] / 2.5) * 2.5;
 
-                    const machine = placedMachines.find(m => Math.abs(m.position[0] - gridX) < 1.2 && Math.abs(m.position[2] - gridZ) < 1.2);
+                    // 기계 감지 반경 1.5 (2.5 그리드의 절반)
+                    const machine = placedMachines.find(m => Math.abs(m.position[0] - gridX) < 1.5 && Math.abs(m.position[2] - gridZ) < 1.5);
                     if (machine) {
                         if (machine.type === 'SHIPPING_BIN') {
                             if (item.isProduct || item.type === 'Upcycled' || item.type.includes('Ingot') || item.type.includes('Flakes') || item.type.includes('Cullet')) {
@@ -42,7 +43,8 @@ export function useFactorySimulation({
                         }
                     }
 
-                    const belt = placedBelts.find(b => Math.abs(b.position[0] - gridX) < 1.0 && Math.abs(b.position[2] - gridZ) < 1.0);
+                    // 벨트 감지 반경 1.3 (2.5 그리드의 절 이상, 코너 전환 안정성 확보)
+                    const belt = placedBelts.find(b => Math.abs(b.position[0] - gridX) < 1.3 && Math.abs(b.position[2] - gridZ) < 1.3);
                     if (belt) {
                         const speed = 0.05;
                         let newX = item.position[0];
