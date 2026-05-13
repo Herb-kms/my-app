@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { HeldItemMesh } from './ItemComponents';
 
 // --- 플레이어 컨트롤러 (이동 로직) ---
-export function PlayerController({ playerRef, perspective, buildMode }) {
+export function PlayerController({ playerRef, playerPositionRef, perspective, buildMode }) {
     const { camera } = useThree();
     const velocity = useRef(new THREE.Vector3());
     const direction = useRef(new THREE.Vector3());
@@ -44,6 +44,16 @@ export function PlayerController({ playerRef, perspective, buildMode }) {
 
         if (playerRef.current) {
             playerRef.current.position.add(velocity.current);
+            
+            // 위치 Ref 업데이트 (App.jsx에서 거리 계산용으로 사용)
+            if (playerPositionRef) {
+                playerPositionRef.current = [
+                    playerRef.current.position.x,
+                    playerRef.current.position.y,
+                    playerRef.current.position.z
+                ];
+            }
+
             // 카메라가 플레이어를 따라다니게 함
             if (perspective === 'first') {
                 camera.position.copy(playerRef.current.position).add(new THREE.Vector3(0, 1.6, 0));

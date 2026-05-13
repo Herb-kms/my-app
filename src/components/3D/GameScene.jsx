@@ -1,11 +1,11 @@
 import React, { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { PerspectiveCamera, Sky, Stars, ContactShadows } from '@react-three/drei';
+import { PerspectiveCamera, Sky, Stars, ContactShadows, Environment } from '@react-three/drei';
 import { Physics } from '@react-three/cannon';
 
 import { Machine, ConveyorBelt } from './MachineComponents';
 import { TrashItem } from './ItemComponents';
-import { Floor, ShippingBin, PropComponents } from './EnvironmentComponents';
+import { Floor, PropComponents } from './EnvironmentComponents';
 import { BuilderController } from './BuilderComponents';
 import { Player, PlayerController, FirstPersonHeldItem } from './PlayerComponents';
 
@@ -19,31 +19,30 @@ export function GameScene({
     buildMode,
     selectedItem,
     playerRef,
+    playerPositionRef,
     canLock,
-    handleUnlock
+    handleUnlock,
+    onPlaceItem,
+    onDemolishItem
 }) {
     return (
-        <Canvas shadows={settings.graphicsQuality === 'high'}>
+        <Canvas shadows gl={{ antialias: true }}>
             <PerspectiveCamera
                 makeDefault
                 position={[12, 5, 12]}
-                fov={settings.perspective === 'first' ? 75 : 45 + (settings.zoom / 5)}
+                fov={settings.perspective === 'first' ? 75 : 50}
             />
             
             <Sky sunPosition={[100, 20, 100]} />
             <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
+            <Environment preset="city" />
             <ambientLight intensity={0.5} />
             <pointLight position={[10, 10, 10]} intensity={1.5} castShadow />
-            <directionalLight
-                position={[5, 10, 5]}
-                intensity={1}
-                castShadow
-                shadow-mapSize={[2048, 2048]}
-            />
 
             <Suspense fallback={null}>
                 <Physics gravity={[0, -9.81, 0]}>
                     <Floor />
+                    <PropComponents placedProps={placedProps} />
                     
                     {/* 설치된 벨트 및 기계 렌더링 */}
                     <ConveyorBelt placedBelts={placedBelts} />
@@ -51,7 +50,12 @@ export function GameScene({
                     
                     {/* 플레이어 및 아이템 */}
                     <Player playerRef={playerRef} perspective={settings.perspective} selectedItem={selectedItem} />
-                    <PlayerController playerRef={playerRef} perspective={settings.perspective} buildMode={buildMode} />
+                    <PlayerController 
+                        playerRef={playerRef} 
+                        playerPositionRef={playerPositionRef}
+                        perspective={settings.perspective} 
+                        buildMode={buildMode} 
+                    />
                     <FirstPersonHeldItem item={selectedItem} perspective={settings.perspective} />
                     
                     {/* 필드 아이템 렌더링 */}
@@ -63,13 +67,13 @@ export function GameScene({
                     {movingItems.map(item => (
                         item.status === 'MOVING' && <TrashItem key={item.id} item={item} />
                     ))}
-
-                    <PropComponents props={placedProps} />
                     
                     <BuilderController 
                         buildMode={buildMode}
                         selectedBuildItem={selectedItem}
                         playerRef={playerRef}
+                        onPlaceItem={onPlaceItem}
+                        onDemolishItem={onDemolishItem}
                         onUnlock={handleUnlock}
                         canLock={canLock}
                     />

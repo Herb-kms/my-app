@@ -13,6 +13,7 @@ export function OverlayUI({
     currentInventory,
     activeHotbarSlot,
     settings,
+    hudInfo,
     setGameState,
     setSettings,
     setIsSettingsOpen,
@@ -29,6 +30,8 @@ export function OverlayUI({
         return <IntroTutorial onComplete={() => setGameState('playing')} />;
     }
 
+    const { isProcessing, stageProgress, currentStageIdx, STAGES } = hudInfo || {};
+
     return (
         <>
             <HUD
@@ -42,6 +45,10 @@ export function OverlayUI({
                 buildMode={buildMode}
                 inventory={currentInventory}
                 activeHotbarSlot={activeHotbarSlot}
+                isProcessing={isProcessing}
+                stageProgress={stageProgress}
+                currentStageIdx={currentStageIdx}
+                STAGES={STAGES}
                 onToggleSettings={() => setIsSettingsOpen(!isSettingsOpen)}
                 onToggleInventory={() => setIsInventoryOpen(!isInventoryOpen)}
                 onToggleBuildInventory={() => setIsBuildInventoryOpen(!isBuildInventoryOpen)}
