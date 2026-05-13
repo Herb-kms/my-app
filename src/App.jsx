@@ -268,12 +268,8 @@ function GameContent() {
             const [x, , z] = playerPositionRef.current;
 
             if (e.code === 'KeyF' || e.code === 'KeyE') {
-                // 1. 일반 아이템 줍기 (필드에 있거나, 무빙 중인데 기계에 들어가지 않은 것)
+                // 1. 일반 아이템 줍기 (필드에 있는 것만 가능, 벨트 위 아이템은 줍기 불가)
                 const itemToPick = items.find(item => {
-                    const dist = Math.sqrt(Math.pow(x - item.position[0], 2) + Math.pow(z - item.position[2], 2));
-                    return dist < 4.0;
-                }) || movingItems.find(item => {
-                    if (item.status === 'PROCESSING') return false;
                     const dist = Math.sqrt(Math.pow(x - item.position[0], 2) + Math.pow(z - item.position[2], 2));
                     return dist < 4.0;
                 });
@@ -530,7 +526,7 @@ function GameContent() {
                     <TrashItem
                         key={item.id}
                         item={item}
-                        currentStageIdx={item.currentStageIdx || 0}
+                        currentStageIdx={item.currentStageIdx ?? -1}
                         isHandFull={isHandFull}
                         hidden={item.status === 'PROCESSING'}
                     />
