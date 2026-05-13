@@ -283,57 +283,58 @@ export function SettingsMenu({ settings, setSettings, onClose }) {
 
 // 4. 건축 목록 창 (Build Inventory UI)
 export const BUILD_CATALOG = [
-    { id: "CONVEYOR", name: "Conveyor Belt", category: "Logistics", icon: "🛤️" },
-    { id: "SORTING", name: "Sorting Machine", category: "Machines", icon: "⚙️" },
-    { id: "CRUSHING", name: "Crusher", category: "Machines", icon: "🔨" },
-    { id: "CLEANING", name: "Cleaner", category: "Machines", icon: "💦" },
-    { id: "DRYING", name: "Dryer", category: "Machines", icon: "♨️" },
-    { id: "PACKAGING", name: "Packager", category: "Machines", icon: "📦" },
-    { id: "SHIPPING_BIN", name: "Sell Zone", category: "Machines", icon: "💲" },
+    { id: "CONVEYOR", name: "Conveyor Belt", category: "Logistics", icon: "🛤️", color: "#00ffcc" },
+    { id: "SORTING", name: "Sorting Machine", category: "Machines", icon: "⚙️", color: "#55aaff" },
+    { id: "CRUSHING", name: "Crusher", category: "Machines", icon: "🔨", color: "#55aaff" },
+    { id: "CLEANING", name: "Cleaner", category: "Machines", icon: "💦", color: "#55aaff" },
+    { id: "DRYING", name: "Dryer", category: "Machines", icon: "♨️", color: "#55aaff" },
+    { id: "PACKAGING", name: "Packager", category: "Machines", icon: "📦", color: "#55aaff" },
+    { id: "SHIPPING_BIN", name: "Sell Zone", category: "Machines", icon: "💲", color: "#4caf50" },
 
-    { id: "SHELF", name: "Steel Shelf", category: "Props", icon: "🗄️" },
-    { id: "CRATE", name: "Storage Crate", category: "Props", icon: "🧰" },
-    { id: "BARREL", name: "Gas Barrel", category: "Props", icon: "🛢️" },
-    { id: "WALL", name: "Factory Wall", category: "Props", icon: "🧱" },
+    { id: "SHELF", name: "Steel Shelf", category: "Props", icon: "🗄️", color: "#ffaa00" },
+    { id: "CRATE", name: "Storage Crate", category: "Props", icon: "🧰", color: "#ffaa00" },
+    { id: "BARREL", name: "Gas Barrel", category: "Props", icon: "🛢️", color: "#ffaa00" },
+    { id: "WALL", name: "Factory Wall", category: "Props", icon: "🧱", color: "#ffaa00" },
 
-    { id: "ITEM_PLASTIC", name: "Plastic Trash", category: "Items", icon: "🥤" },
-    { id: "ITEM_CAN", name: "Can Trash", category: "Items", icon: "🥫" },
-    { id: "ITEM_GLASS", name: "Glass Trash", category: "Items", icon: "🍾" },
+    { id: "ITEM_PLASTIC", name: "Plastic Trash", category: "Items", icon: "🥤", color: "#88ff44" },
+    { id: "ITEM_CAN", name: "Can Trash", category: "Items", icon: "🥫", color: "#88ff44" },
+    { id: "ITEM_GLASS", name: "Glass Trash", category: "Items", icon: "🍾", color: "#88ff44" },
 ];
 
 export function BuildInventory({ isOpen, onClose, onSelectItem }) {
     if (!isOpen) return null;
     return (
-        <div className="build-inventory-overlay glass-panel" style={{
-            position: 'absolute', top: '10%', left: '10%', width: '80%', height: '80%',
-            background: 'rgba(0, 0, 0, 0.85)', border: '2px solid #00ffcc', zIndex: 1000,
-            display: 'flex', flexDirection: 'column', padding: '20px', overflowY: 'auto',
-            pointerEvents: 'auto'
-        }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #333', paddingBottom: '10px' }}>
-                <h1 style={{ color: '#00ffcc', margin: 0, letterSpacing: '2px' }}>BUILD CATALOG</h1>
-                <button onClick={onClose} style={{ background: 'none', color: '#ff4444', border: 'none', fontSize: '24px', cursor: 'pointer' }}>✖</button>
-            </div>
-
-            <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', marginTop: '30px' }}>
-                {BUILD_CATALOG.map(item => (
-                    <div key={item.id} className="build-item-card" onClick={() => onSelectItem(item.id)} style={{
-                        width: '130px', height: '150px', background: 'rgba(255,255,255,0.05)',
-                        border: '1px solid #444', borderRadius: '10px', display: 'flex', flexDirection: 'column',
-                        alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s',
-                        boxShadow: '0 4px 10px rgba(0,0,0,0.5)'
-                    }}
-                        onMouseOver={(e) => { e.currentTarget.style.borderColor = '#00ffcc'; e.currentTarget.style.background = 'rgba(0,255,204,0.1)'; }}
-                        onMouseOut={(e) => { e.currentTarget.style.borderColor = '#444'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
-                    >
-                        <div style={{ fontSize: '40px', marginBottom: '15px' }}>{item.icon}</div>
-                        <div style={{ fontSize: '15px', fontWeight: 'bold', textAlign: 'center', color: '#fff' }}>{item.name}</div>
-                        <div style={{ fontSize: '11px', color: '#888', marginTop: '8px' }}>{item.category}</div>
-                    </div>
-                ))}
-            </div>
-            <div style={{ textAlign: 'center', marginTop: 'auto', color: '#888', fontSize: '14px', letterSpacing: '1px' }}>
-                CLICK TO EQUIP • PRESS V OR ESC TO CLOSE
+        <div className="inventory-full-overlay">
+            <div className="storage-grid glass-panel">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                    <h2 style={{ margin: 0, letterSpacing: '4px' }}>BUILD CATALOG</h2>
+                    <button onClick={onClose} style={{ background: 'none', color: '#ff4444', border: 'none', fontSize: '20px', cursor: 'pointer' }}>✖</button>
+                </div>
+                
+                <div className="grid-layout">
+                    {[...Array(16)].map((_, i) => {
+                        const item = BUILD_CATALOG[i];
+                        return (
+                            <div
+                                key={i}
+                                className="grid-slot"
+                                onClick={() => item && onSelectItem(item.id)}
+                                style={{ borderColor: item ? 'rgba(0, 255, 204, 0.4)' : undefined }}
+                            >
+                                {item ? (
+                                    <div className="item-preview">
+                                        <span style={{ fontSize: '24px' }}>{item.icon}</span>
+                                        <span>{item.name}</span>
+                                        <span style={{ fontSize: '9px', opacity: 0.5 }}>{item.category}</span>
+                                    </div>
+                                ) : (
+                                    <span style={{ opacity: 0.1, fontSize: '24px' }}>+</span>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+                <div className="close-hint">CLICK TO EQUIP • V TO CLOSE</div>
             </div>
         </div>
     );
