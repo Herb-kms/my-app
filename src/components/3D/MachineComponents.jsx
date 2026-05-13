@@ -1,8 +1,6 @@
 import React from 'react';
 import { Box, Text } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
-import { MACHINE_CONFIGS, BELT_POINTS } from '../../constants/gameConstants';
-
 // ─── 컨베이어 벨트 ────────────────────────────────────────────────────────────
 // placedBelts 배열을 받아 그리드에 맞게 배치
 // 벨트 타일은 그리드(2.5) 전체를 꽉 채워 틈 없이 연결되도록 설계

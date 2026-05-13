@@ -16,7 +16,7 @@ import { INITIAL_ITEMS, STAGES } from './constants/gameConstants';
 import { Player, FirstPersonHeldItem } from './components/3D/PlayerComponents';
 import { ConveyorBelt, Machine } from './components/3D/MachineComponents';
 import { TrashItem } from './components/3D/ItemComponents';
-import { Floor, FactoryShell, IndustrialAssets, ShippingBin, PropComponents } from './components/3D/EnvironmentComponents';
+import { Floor, ShippingBin, PropComponents } from './components/3D/EnvironmentComponents';
 import { BuilderController } from './components/3D/BuilderComponents';
 import { Lobby, HUD, SettingsMenu, BuildInventory, BUILD_CATALOG } from './components/UI/UIComponents';
 
