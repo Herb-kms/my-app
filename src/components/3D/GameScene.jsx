@@ -17,6 +17,7 @@ export function GameScene({
     placedBelts,
     placedProps,
     buildMode,
+    isHandFull,
     selectedItem,
     playerRef,
     playerPositionRef,
@@ -46,7 +47,7 @@ export function GameScene({
                     
                     {/* 설치된 벨트 및 기계 렌더링 */}
                     <ConveyorBelt placedBelts={placedBelts} />
-                    <Machine machines={placedMachines} movingItems={movingItems} />
+                    <Machine placedMachines={placedMachines} movingItems={movingItems} />
                     
                     {/* 플레이어 및 아이템 */}
                     <Player playerRef={playerRef} perspective={settings.perspective} selectedItem={selectedItem} />

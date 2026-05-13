@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Text } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { ShippingBin } from './EnvironmentComponents';
+import { MACHINE_CONFIGS } from '../../data/constants';
 // ─── 컨베이어 벨트 ────────────────────────────────────────────────────────────
 // placedBelts 배열을 받아 그리드에 맞게 배치
 // 벨트 타일은 그리드(2.5) 전체를 꽉 채워 틈 없이 연결되도록 설계
@@ -365,7 +366,7 @@ export function Machine({ placedMachines = [], movingItems = [] }) {
                                     </group>
                                 </group>
                                 <Text position={[0.2, 0.7, 0.12]} fontSize={0.35} color="white" maxWidth={1.2} textAlign="center" fontWeight="bold">
-                                    {cfg.type}
+                                    {MACHINE_CONFIGS[cfg.type]?.label || cfg.type}
                                 </Text>
                                 <Box args={[0.15, 0.15, 0.1]} position={[0.9, 0.95, 0.1]}>
                                     <meshStandardMaterial color={isActive ? '#00ff00' : '#444'} emissive={isActive ? '#00ff00' : 'black'} emissiveIntensity={isActive ? 1.5 : 0} />
