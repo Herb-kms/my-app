@@ -12,19 +12,19 @@ export const INITIAL_ITEMS = [
 ];
 
 export const DEFAULT_MACHINES = [
-    { id: 'm1', type: 'CRUSHING', position: [0, 0, 0], rotation: 0 },
-    { id: 'm2', type: 'CLEANING', position: [0, 0, -5], rotation: 0 },
-    { id: 'm3', type: 'SORTING', position: [5, 0, -5], rotation: Math.PI / 2 },
-    { id: 'm4', type: 'PACKAGING', position: [10, 0, -5], rotation: Math.PI },
-    { id: 'm5', type: 'SHIPPING_BIN', position: [10, 0, 0], rotation: Math.PI },
+    { id: 'm1', type: 'CRUSHING',     position: [0, 0, 0],   rotation: [0, 0,            0] },
+    { id: 'm2', type: 'CLEANING',     position: [0, 0, -5],  rotation: [0, 0,            0] },
+    { id: 'm3', type: 'SORTING',      position: [5, 0, -5],  rotation: [0, Math.PI / 2,  0] },
+    { id: 'm4', type: 'PACKAGING',    position: [10, 0, -5], rotation: [0, Math.PI,      0] },
+    { id: 'm5', type: 'SHIPPING_BIN', position: [10, 0, 0],  rotation: [0, Math.PI,      0] },
 ];
 
 export const DEFAULT_BELTS = [
-    { id: 'b1', position: [0, 0, 2.5], rotation: 0 },
-    { id: 'b2', position: [0, 0, -2.5], rotation: 0 },
-    { id: 'b3', position: [2.5, 0, -5], rotation: Math.PI / 2 },
-    { id: 'b4', position: [7.5, 0, -5], rotation: Math.PI / 2 },
-    { id: 'b5', position: [10, 0, -2.5], rotation: Math.PI },
+    { id: 'b1', position: [0, 0, 2.5],  rotation: [0, 0,           0] },
+    { id: 'b2', position: [0, 0, -2.5], rotation: [0, 0,           0] },
+    { id: 'b3', position: [2.5, 0, -5], rotation: [0, Math.PI / 2, 0] },
+    { id: 'b4', position: [7.5, 0, -5], rotation: [0, Math.PI / 2, 0] },
+    { id: 'b5', position: [10, 0, -2.5],rotation: [0, Math.PI,     0] },
 ];
 
 export const BUILD_CATALOG = [

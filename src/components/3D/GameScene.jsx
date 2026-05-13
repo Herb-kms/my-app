@@ -84,16 +84,25 @@ export function GameScene({
                         />
                         <FirstPersonHeldItem item={selectedItem} perspective={settings.perspective} />
 
-                        {/* 필드 아이템 */}
+                        {/* 필드 아이템 (IDLE 상태) */}
                         {items.map(item => (
-                            <TrashItem key={item.id} item={item} isHandFull={isHandFull} />
+                            <TrashItem
+                                key={item.id}
+                                item={item}
+                                currentStageIdx={-1}
+                                isHandFull={isHandFull}
+                            />
                         ))}
 
-                        {/* 이동 중인 아이템 */}
+                        {/* 벨트 위 이동/가공 아이템 */}
                         {movingItems.map(item => (
-                            item.status === 'MOVING' && (
-                                <TrashItem key={item.id} item={item} isHandFull={isHandFull} />
-                            )
+                            <TrashItem
+                                key={item.id}
+                                item={item}
+                                currentStageIdx={item.currentStageIdx ?? -1}
+                                hidden={item.status === 'PROCESSING'}
+                                isHandFull={isHandFull}
+                            />
                         ))}
 
                         {/* 건설 컨트롤러 */}

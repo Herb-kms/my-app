@@ -3,14 +3,20 @@ import { Box, Text } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { ShippingBin } from './EnvironmentComponents';
 import { MACHINE_CONFIGS } from '../../data/constants';
+
+// rotation 정규화 (숫자 → [x,y,z] 배열)
+function toEuler(r) {
+    if (Array.isArray(r)) return r;
+    if (typeof r === 'number') return [0, r, 0];
+    return [0, 0, 0];
+}
+
 // ─── 컨베이어 벨트 ────────────────────────────────────────────────────────────
-// placedBelts 배열을 받아 그리드에 맞게 배치
-// 벨트 타일은 그리드(2.5) 전체를 꽉 채워 틈 없이 연결되도록 설계
 export function ConveyorBelt({ placedBelts = [] }) {
     return (
         <group>
             {placedBelts.map((belt) => (
-                <group key={belt.id} position={belt.position} rotation={belt.rotation}>
+                <group key={belt.id} position={belt.position} rotation={toEuler(belt.rotation)}>
                     {/* 벨트 표면 - 그리드 전체 너비(2.5)를 채워 타일이 자연스럽게 이어짐 */}
                     <Box args={[2.45, 0.08, 2.45]} position={[0, 0.04, 0]} receiveShadow>
                         <meshStandardMaterial color="#1a1a1a" metalness={0.8} roughness={0.3} />
@@ -297,7 +303,7 @@ export function Machine({ placedMachines = [], movingItems = [] }) {
                 const progress = processingItem ? processingItem.machineProgress : 0;
 
                 return (
-                    <group key={cfg.id} position={cfg.position} rotation={cfg.rotation}>
+                    <group key={cfg.id} position={cfg.position} rotation={toEuler(cfg.rotation)}>
 
                         {/* ── 하단 공통 베이스 플레이트 (판매존 제외) ─────── */}
                         {cfg.type !== 'SHIPPING_BIN' && (
