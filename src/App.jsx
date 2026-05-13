@@ -135,6 +135,12 @@ function GameContent() {
             if (gameState !== 'playing') return;
 
             // UI Toggle
+            if (e.code === 'Escape') {
+                if (isBuildInventoryOpen) setIsBuildInventoryOpen(false);
+                else if (isInventoryOpen) setIsInventoryOpen(false);
+                else setIsSettingsOpen(prev => !prev);
+                return;
+            }
             if (e.code === 'KeyB') setBuildMode(prev => !prev);
             if (e.code === 'Tab' || e.code === 'KeyI') { e.preventDefault(); setIsInventoryOpen(prev => !prev); }
             if (e.code === 'KeyV') setIsBuildInventoryOpen(prev => !prev);
@@ -149,8 +155,8 @@ function GameContent() {
 
             const [px, , pz] = playerPositionRef.current;
 
-            // Pick Up (F or E)
-            if (e.code === 'KeyF' || e.code === 'KeyE') {
+            // Pick Up (F) — 건축 모드일 때는 E키를 회전에 쓰므로 F만 사용
+            if ((e.code === 'KeyF' || (e.code === 'KeyE' && !buildMode))) {
                 const itemToPick = items.find(item => {
                     const dist = Math.sqrt(Math.pow(px - item.position[0], 2) + Math.pow(pz - item.position[2], 2));
                     return dist < 3.5;
@@ -254,6 +260,16 @@ function GameContent() {
                 setIsBuildInventoryOpen={setIsBuildInventoryOpen}
                 handleInventoryClick={handleInventoryClick}
                 handleStart={handleStart}
+                onEquipBuildItem={(itemId) => {
+                    // BUILD_CATALOG에서 아이템 찾아 활성 핑바에 장착
+                    const found = BUILD_CATALOG.find(c => c.id === itemId);
+                    if (found) {
+                        const newInv = [...buildInventory];
+                        newInv[activeHotbarSlot - 1] = found;
+                        setBuildInventory(newInv);
+                        setBuildMode(true);
+                    }
+                }}
             />
         </div>
     );

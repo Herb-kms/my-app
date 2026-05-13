@@ -195,9 +195,10 @@ export function HUD({
 }
 
 // 3. Settings Menu (Overlay)
-export function SettingsMenu({ settings, setSettings, onClose }) {
+export function SettingsMenu({ settings, setSettings, onUpdate, onClose }) {
     const handleChange = (key, value) => {
-        setSettings(prev => ({ ...prev, [key]: value }));
+        if (setSettings) setSettings(prev => ({ ...prev, [key]: value }));
+        if (onUpdate) onUpdate(prev => ({ ...prev, [key]: value }));
     };
 
     return (
