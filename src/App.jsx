@@ -12,7 +12,7 @@ import * as THREE from 'three';
 import './App.css';
 
 // 모듈화된 상수 및 컴포넌트 임포트
-import { INITIAL_ITEMS, STAGES, STAGE_SPEED_FACTORS, MACHINE_CONFIGS, BELT_POINTS } from './constants/gameConstants';
+import { INITIAL_ITEMS, STAGES } from './constants/gameConstants';
 import { Player, FirstPersonHeldItem } from './components/3D/PlayerComponents';
 import { ConveyorBelt, Machine } from './components/3D/MachineComponents';
 import { TrashItem } from './components/3D/ItemComponents';
