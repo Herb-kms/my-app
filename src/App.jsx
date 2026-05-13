@@ -502,8 +502,6 @@ function GameContent() {
                     return item; // IDLE status
                 });
 
-            });
-
             if (changed || soldAmount > 0) {
                 if (soldAmount > 0) {
                     setMoney(prev => prev + soldAmount);
