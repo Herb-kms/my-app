@@ -333,7 +333,7 @@ function GameContent() {
                     Math.sqrt(Math.pow(x - m.position[0], 2) + Math.pow(z - m.position[2], 2)) < 5.0
                 );
 
-                if (nearestSellZone && (selectedItem.isProduct || selectedItem.type === 'Upcycled')) {
+                if (nearestSellZone && (selectedItem.isProduct || selectedItem.type === 'Upcycled' || selectedItem.type.includes('Ingot') || selectedItem.type.includes('Flakes') || selectedItem.type.includes('Cullet'))) {
                     const sellValue = selectedItem.value || 10;
                     setMoney(prev => prev + sellValue);
                     setResults(prev => [`SOLD: ${selectedItem.type} for $${sellValue}`, ...prev].slice(0, 5));
@@ -394,12 +394,17 @@ function GameContent() {
                         const machine = placedMachines.find(m => Math.abs(m.position[0] - gridX) < 1.2 && Math.abs(m.position[2] - gridZ) < 1.2);
                         if (machine) {
                             if (machine.type === 'SHIPPING_BIN') {
-                                const val = item.value || 10;
-                                soldAmount += val;
-                                salesLog.push(`SOLD: ${item.name || item.type} for $${val}`);
-                                return null;
+                                // 완성된 제품(isProduct)만 판매 가능
+                                if (item.isProduct || item.type === 'Upcycled' || item.type.includes('Ingot') || item.type.includes('Flakes') || item.type.includes('Cullet')) {
+                                    const val = item.value || 10;
+                                    soldAmount += val;
+                                    salesLog.push(`SOLD: ${item.name || item.type} for $${val}`);
+                                    return null;
+                                }
+                                // 제품이 아니면 판매되지 않음
+                            } else {
+                                return { ...item, status: 'PROCESSING', machineId: machine.id, machineProgress: 0 };
                             }
-                            return { ...item, status: 'PROCESSING', machineId: machine.id, machineProgress: 0 };
                         }
 
                         // Check Belt
@@ -446,12 +451,15 @@ function GameContent() {
                         const m = placedMachines.find(m => m.id === item.machineId);
                         if (!m) return { ...item, status: 'MOVING' }; // machine deleted by user somehow
 
-                        // 예외 처리: 만약 기계가 판매 구역(SHIPPING_BIN)이라면 여기서도 즉시 판매
+                        // 예외 처리: 만약 기계가 판매 구역(SHIPPING_BIN)이라면 제품일 경우에만 판매
                         if (m.type === 'SHIPPING_BIN') {
-                            const val = item.value || 10;
-                            soldAmount += val;
-                            salesLog.push(`SOLD: ${item.name || item.type} for $${val}`);
-                            return null;
+                            if (item.isProduct || item.type === 'Upcycled' || item.type.includes('Ingot') || item.type.includes('Flakes') || item.type.includes('Cullet')) {
+                                const val = item.value || 10;
+                                soldAmount += val;
+                                salesLog.push(`SOLD: ${item.name || item.type} for $${val}`);
+                                return null;
+                            }
+                            return { ...item, status: 'MOVING' }; // 제품이 아니면 이동 상태로 되돌림
                         }
 
                         const speedFactor = 0.5;
