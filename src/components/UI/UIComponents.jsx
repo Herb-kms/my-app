@@ -26,7 +26,7 @@ export function Lobby({ onStart }) {
 
                 <div className="start-controls">
                     <button className="start-button" onClick={onStart}>
-                        SIMULATION START
+                        스마트 팩토리 프로젝트 시작
                     </button>
                     <div className="control-badges">
                         <span className="badge-item">WASD Move</span>
@@ -374,27 +374,27 @@ export function BuildInventory({ isOpen, onClose, onSelectItem, inventory, activ
 const INTRO_SLIDES = [
     {
         id: 1,
-        title: "THE EARTH IS CHOKING",
-        description: "The year is 20XX. The planet has been overwhelmed by mountains of plastic, metal, and glass waste. Nature is dying, and hope is fading.",
+        title: "침식되는 금수강산",
+        description: "서기 20XX년, 아름답던 대한민국은 끝없는 쓰레기산에 신음하고 있습니다.\n푸른 동해바다와 웅장한 설악산마저 오염의 파도에 잠겨가고, 인류의 미래는 칠흑 같은 어둠 속에 갇혔습니다.",
         image: "/assets/intro/slide1.png"
     },
     {
         id: 2,
-        title: "THE RECYCLING REVOLUTION",
-        description: "Scientists have developed a breakthrough: The Smart Upcycling Machine. It can transform raw garbage into high-value industrial materials.",
+        title: "마지막 희망: K-테크",
+        description: "절망의 끝에서 대한민국의 천재 과학자들이 결집하여 혁신을 일궈냈습니다.\n버려진 쓰레기를 빛나는 자원으로 연성하는 '스마트 업사이클링' 기술.\n이것이 지구를 구할 마지막 열쇠입니다.",
         image: "/assets/intro/slide2.png"
     },
     {
         id: 3,
-        title: "YOUR MISSION",
-        description: "As the manager of the First Smart Factory, you must build efficient production lines to purify the earth. Every product sold brings us closer to a green future.",
+        title: "당신의 임무: 강산의 수호자",
+        description: "당신은 세계 최초 스마트 팩토리의 총책임자로 임명되었습니다.\n완벽한 자동화 공정을 설계하여 오염된 자원을 정화하고 수익을 창출하십시오.\n다시 푸른 강산을 되찾는 것이 당신의 사명입니다.",
         image: "/assets/intro/slide3.png"
     },
     {
         id: 4,
-        title: "HOW TO OPERATE",
-        description: "• WASD / Arrow Keys: Move Player\n• B: Toggle Build Mode\n• TAB / I: Open Inventory\n• V: Open Build Catalog\n• G / F: Pick up or Drop/Sell Item",
-        image: null // 조작법은 배경 없이 깔끔하게
+        title: "공장 가동 지침 (조작 가이드)",
+        description: "• 이동: WASD / 방향키\n• 건축 모드 전환: B 키\n• 개인 배낭 열기: TAB 또는 I 키\n• 건축 카탈로그: V 키\n• 아이템 줍기/판매(던지기): G 또는 F 키\n\n준비가 되셨습니까? 이제 인류의 미래가 당신의 손에 달렸습니다.",
+        image: null
     }
 ];
 
@@ -436,10 +436,10 @@ export function IntroTutorial({ onComplete }) {
                 
                 <div className="intro-buttons">
                     {currentSlide > 0 && (
-                        <button className="lobby-btn secondary" onClick={prevSlide}>BACK</button>
+                        <button className="lobby-btn secondary" onClick={prevSlide}>이전으로</button>
                     )}
                     <button className="lobby-btn primary" onClick={nextSlide}>
-                        {currentSlide === INTRO_SLIDES.length - 1 ? "ENTER FACTORY" : "NEXT"}
+                        {currentSlide === INTRO_SLIDES.length - 1 ? "공장 진입하기" : "다음으로"}
                     </button>
                 </div>
             </div>
