@@ -1,5 +1,6 @@
 import React from 'react';
-import { Lobby, HUD, SettingsMenu, BuildInventory, IntroTutorial } from './UIComponents';
+import { Lobby, HUD, SettingsMenu, BuildInventory } from './UIComponents';
+import { IntroTutorial } from './IntroTutorial';
 
 export function OverlayUI({
     gameState,

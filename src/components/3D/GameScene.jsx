@@ -3,8 +3,7 @@ import { Canvas } from '@react-three/fiber';
 import { PerspectiveCamera, Sky, Stars, ContactShadows } from '@react-three/drei';
 import { Physics } from '@react-three/cannon';
 
-import { Machine } from './MachineComponents';
-import { Belt } from './BeltComponents';
+import { Machine, ConveyorBelt } from './MachineComponents';
 import { TrashItem } from './ItemComponents';
 import { Floor, ShippingBin, PropComponents } from './EnvironmentComponents';
 import { BuilderController } from './BuilderComponents';
@@ -46,9 +45,7 @@ export function GameScene({
                     <Floor />
                     
                     {/* 설치된 벨트 및 기계 렌더링 */}
-                    {placedBelts.map(b => (
-                        <Belt key={b.id} position={b.position} rotation={b.rotation} />
-                    ))}
+                    <ConveyorBelt placedBelts={placedBelts} />
                     <Machine machines={placedMachines} movingItems={movingItems} />
                     
                     {/* 필드 아이템 렌더링 */}
