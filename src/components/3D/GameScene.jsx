@@ -68,7 +68,7 @@ export function GameScene({
                     
                     <BuilderController 
                         buildMode={buildMode}
-                        selectedItem={selectedItem}
+                        selectedBuildItem={selectedItem}
                         playerRef={playerRef}
                         onUnlock={handleUnlock}
                         canLock={canLock}
