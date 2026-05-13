@@ -88,8 +88,12 @@ function PlayerController({
                 playerRef.current.position.z
             );
         } else {
-            // 3인칭: 플레이어 뒤쪽 오프셋
-            const offset = new THREE.Vector3(0, 3 + (zoom * 0.05), 5 + (zoom * 0.1));
+            // 3인칭: 배그 스타일 숄더뷰 (약간 낮고 오른쪽 어깨 쪽)
+            const heightOffset = 1.8 + (zoom * 0.02);
+            const depthOffset = 3.5 + (zoom * 0.05);
+            const shoulderOffset = 0.6; // 오른쪽 어깨 쪽으로 살짝 이동
+
+            const offset = new THREE.Vector3(shoulderOffset, heightOffset, depthOffset);
             offset.applyQuaternion(state.camera.quaternion);
             targetPos.set(
                 playerRef.current.position.x + offset.x,
