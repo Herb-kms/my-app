@@ -53,7 +53,8 @@ function GameContent() {
     const playerPositionRef = useRef([12, 0, 12]);
     const currentInventory = buildMode ? buildInventory : normalInventory;
     const selectedItem = currentInventory[activeHotbarSlot - 1];
-    const isHandFull = currentInventory.filter(slot => slot !== null).length >= 16;
+    // isHandFull: 일반 인벤토리(normalInventory) 기준으로만 계산 (빌드 인벤토리는 항상 풀이므로 제외)
+    const isHandFull = normalInventory.filter(slot => slot !== null).length >= 16;
 
     // 2. 시뮬레이션 및 HUD 정보
     useEffect(() => { movingItemsRef.current = movingItems; }, [movingItems]);
@@ -209,7 +210,9 @@ function GameContent() {
                 }
                 const newInv = [...currentInventory];
                 newInv[activeHotbarSlot - 1] = null;
-                setNormalInventory(newInv);
+                // buildMode 여부에 따라 올바른 인벤토리 업데이트
+                if (buildMode) setBuildInventory(newInv);
+                else setNormalInventory(newInv);
             }
         };
 

@@ -118,10 +118,11 @@ export function GameScene({
 
                 <ContactShadows position={[0, 0, 0]} opacity={0.4} scale={40} blur={2} far={4.5} />
 
-                {/* 포인터 락 - UI가 열려있지 않을 때만 활성화 */}
-                {canLock && !isUIOpen && (
-                    <PointerLockControls onUnlock={handleUnlock} />
-                )}
+                {/* 포인터 락 - 항상 마운트, UI 열리면 비활성화 */}
+                <PointerLockControls
+                    enabled={canLock && !isUIOpen}
+                    onUnlock={handleUnlock}
+                />
             </Canvas>
         </KeyboardControls>
     );

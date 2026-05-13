@@ -135,16 +135,19 @@ export function TrashItem({ item, currentStageIdx = -1, isHandFull, hidden }) {
         );
     }
 
+    const isMoving = item.status === 'MOVING' || item.status === 'PROCESSING';
+
     return (
         <group position={item.position} scale={scale}>
-            <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
+            {/* IDLE 아이템만 Float 적용, 벨트 위 이동 아이템은 고정 */}
+            {isMoving ? (
                 <mesh castShadow>
                     {geometryType === "Can" ? (
                         <cylinderGeometry args={[0.2, 0.2, 0.5, 16]} />
                     ) : geometryType === "Plastic" ? (
                         <boxGeometry args={[0.3, 0.4, 0.3]} />
                     ) : geometryType === "Crushed" ? (
-                        <boxGeometry args={[0.4, 0.1, 0.4]} /> // 납작하게 으깨진 형태
+                        <boxGeometry args={[0.4, 0.1, 0.4]} />
                     ) : (
                         <sphereGeometry args={[0.25, 16, 16]} />
                     )}
@@ -156,23 +159,44 @@ export function TrashItem({ item, currentStageIdx = -1, isHandFull, hidden }) {
                         emissiveIntensity={emissiveIntensity}
                     />
                 </mesh>
-                {/* 포장 박스 시각화 (5단계) */}
-                {isPacked && (
-                    <Box args={[0.5, 0.5, 0.5]} castShadow>
-                        <meshStandardMaterial color="white" opacity={0.3} transparent wireframe />
-                    </Box>
-                )}
-                {isNear && (
-                    <Text
-                        position={[0, 1, 0]}
-                        fontSize={0.25}
-                        color={isHandFull ? "#ff4444" : "white"}
-                        fontWeight="bold"
-                    >
-                        {isHandFull ? "[FULL] CANNOT PICK UP" : "[F] PICK UP"}
-                    </Text>
-                )}
-            </Float>
+            ) : (
+                <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
+                    <mesh castShadow>
+                        {geometryType === "Can" ? (
+                            <cylinderGeometry args={[0.2, 0.2, 0.5, 16]} />
+                        ) : geometryType === "Plastic" ? (
+                            <boxGeometry args={[0.3, 0.4, 0.3]} />
+                        ) : geometryType === "Crushed" ? (
+                            <boxGeometry args={[0.4, 0.1, 0.4]} />
+                        ) : (
+                            <sphereGeometry args={[0.25, 16, 16]} />
+                        )}
+                        <meshStandardMaterial
+                            color={color}
+                            roughness={roughness}
+                            metalness={metalness}
+                            emissive={targetEmissive}
+                            emissiveIntensity={emissiveIntensity}
+                        />
+                    </mesh>
+                    {/* 포장 박스 시각화 (5단계) */}
+                    {isPacked && (
+                        <Box args={[0.5, 0.5, 0.5]} castShadow>
+                            <meshStandardMaterial color="white" opacity={0.3} transparent wireframe />
+                        </Box>
+                    )}
+                    {isNear && (
+                        <Text
+                            position={[0, 1, 0]}
+                            fontSize={0.25}
+                            color={isHandFull ? "#ff4444" : "white"}
+                            fontWeight="bold"
+                        >
+                            {isHandFull ? "[FULL] CANNOT PICK UP" : "[F] PICK UP"}
+                        </Text>
+                    )}
+                </Float>
+            )}
         </group>
     );
 }
