@@ -379,18 +379,16 @@ function GameContent() {
                         const gridX = Math.round(item.position[0] / 2.5) * 2.5;
                         const gridZ = Math.round(item.position[2] / 2.5) * 2.5;
 
-                        // Check Machine
-                        const machine = placedMachines.find(m => Math.abs(m.position[0] - gridX) < 1.0 && Math.abs(m.position[2] - gridZ) < 1.0);
+                        // Check Machine (기계 및 판매 구역 감지)
+                        const machine = placedMachines.find(m => Math.abs(m.position[0] - gridX) < 1.2 && Math.abs(m.position[2] - gridZ) < 1.2);
                         if (machine) {
-                            // 만약 판매 구역이라면 즉시 판매 처리
+                            // 판매 구역(SHIPPING_BIN)일 경우: 모든 아이템 즉시 판매
                             if (machine.type === 'SHIPPING_BIN') {
-                                if (item.isProduct || item.type === 'Upcycled') {
-                                    const val = item.value || 10;
-                                    setMoney(prev => prev + val);
-                                    setResults(prev => [`SOLD: ${item.type} for $${val}`, ...prev].slice(0, 5));
-                                    changed = true;
-                                    return null; // 벨트에서 제거
-                                }
+                                const val = item.value || 10; // 제품이 아니면 기본값 10원
+                                setMoney(prev => prev + val);
+                                setResults(prev => [`SOLD: ${item.name || item.type} for $${val}`, ...prev].slice(0, 5));
+                                changed = true;
+                                return null; // 벨트 및 시뮬레이션에서 즉시 제거
                             }
                             return { ...item, status: 'PROCESSING', machineId: machine.id, machineProgress: 0 };
                         }
