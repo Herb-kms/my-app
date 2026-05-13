@@ -50,7 +50,7 @@ function GameContent() {
     });
 
     const playerRef = useRef();
-    const playerPositionRef = useRef([12, 0, 12]);
+    const playerPositionRef = useRef([10, 0, 8]);
     const currentInventory = buildMode ? buildInventory : normalInventory;
     const selectedItem = currentInventory[activeHotbarSlot - 1];
     // isHandFull: 일반 인벤토리(normalInventory) 기준으로만 계산 (빌드 인벤토리는 항상 풀이므로 제외)

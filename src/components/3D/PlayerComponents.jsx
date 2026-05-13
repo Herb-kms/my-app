@@ -108,7 +108,7 @@ export function Player({ playerRef, perspective, selectedItem }) {
     });
 
     return (
-        <group ref={playerRef} position={[12, 0, 12]}>
+        <group ref={playerRef} position={[10, 0, 8]}>
             <group ref={modelRef}>
                 {/* 몸통 */}
                 <Box args={[0.6, 1.6, 0.4]} position={[0, 0.8, 0]} castShadow>
