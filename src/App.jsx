@@ -608,8 +608,10 @@ function GameContent() {
                     setPlacedMachines(DEFAULT_MACHINES);
                     setPlacedProps([]);
                     setResults(["Simulation Initialized"]);
-                    setGameState('playing');
+                    setGameState('intro');
                 }} />
+            ) : gameState === 'intro' ? (
+                <IntroTutorial onComplete={() => setGameState('playing')} />
             ) : (
                 <HUD
                     gameState={gameState}

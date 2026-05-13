@@ -370,3 +370,159 @@ export function BuildInventory({ isOpen, onClose, onSelectItem, inventory, activ
         </div>
     );
 }
+
+const INTRO_SLIDES = [
+    {
+        id: 1,
+        title: "THE EARTH IS CHOKING",
+        description: "The year is 20XX. The planet has been overwhelmed by mountains of plastic, metal, and glass waste. Nature is dying, and hope is fading.",
+        image: "/assets/intro/slide1.png"
+    },
+    {
+        id: 2,
+        title: "THE RECYCLING REVOLUTION",
+        description: "Scientists have developed a breakthrough: The Smart Upcycling Machine. It can transform raw garbage into high-value industrial materials.",
+        image: "/assets/intro/slide2.png"
+    },
+    {
+        id: 3,
+        title: "YOUR MISSION",
+        description: "As the manager of the First Smart Factory, you must build efficient production lines to purify the earth. Every product sold brings us closer to a green future.",
+        image: "/assets/intro/slide3.png"
+    },
+    {
+        id: 4,
+        title: "HOW TO OPERATE",
+        description: "• WASD / Arrow Keys: Move Player\n• B: Toggle Build Mode\n• TAB / I: Open Inventory\n• V: Open Build Catalog\n• G / F: Pick up or Drop/Sell Item",
+        image: null // 조작법은 배경 없이 깔끔하게
+    }
+];
+
+export function IntroTutorial({ onComplete }) {
+    const [currentSlide, setCurrentSlide] = useState(0);
+    const slide = INTRO_SLIDES[currentSlide];
+
+    const nextSlide = () => {
+        if (currentSlide < INTRO_SLIDES.length - 1) {
+            setCurrentSlide(prev => prev + 1);
+        } else {
+            onComplete();
+        }
+    };
+
+    const prevSlide = () => {
+        if (currentSlide > 0) {
+            setCurrentSlide(prev => prev - 1);
+        }
+    };
+
+    return (
+        <div className="intro-tutorial-overlay">
+            {slide.image && (
+                <div 
+                    className="intro-background-image" 
+                    style={{ backgroundImage: `url(${slide.image})` }}
+                />
+            )}
+            <div className="intro-content-container glass-panel">
+                <div className="slide-progress">
+                    {INTRO_SLIDES.map((_, i) => (
+                        <div key={i} className={`progress-dot ${i === currentSlide ? 'active' : ''}`} />
+                    ))}
+                </div>
+                
+                <h1 className="intro-title">{slide.title}</h1>
+                <p className="intro-description">{slide.description}</p>
+                
+                <div className="intro-buttons">
+                    {currentSlide > 0 && (
+                        <button className="lobby-btn secondary" onClick={prevSlide}>BACK</button>
+                    )}
+                    <button className="lobby-btn primary" onClick={nextSlide}>
+                        {currentSlide === INTRO_SLIDES.length - 1 ? "ENTER FACTORY" : "NEXT"}
+                    </button>
+                </div>
+            </div>
+            
+            <style dangerouslySetInnerHTML={{ __html: `
+                .intro-tutorial-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    background: #000;
+                    z-index: 10000;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    overflow: hidden;
+                }
+                .intro-background-image {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-size: cover;
+                    background-position: center;
+                    filter: brightness(0.4);
+                    animation: panBackground 20s infinite alternate ease-in-out;
+                }
+                @keyframes panBackground {
+                    from { transform: scale(1.1) translateX(-2%); }
+                    to { transform: scale(1.1) translateX(2%); }
+                }
+                .intro-content-container {
+                    position: relative;
+                    width: 600px;
+                    padding: 60px;
+                    text-align: center;
+                    animation: slideUpFade 0.8s ease-out;
+                    border: 1px solid rgba(0, 255, 204, 0.3);
+                }
+                @keyframes slideUpFade {
+                    from { opacity: 0; transform: translateY(30px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .intro-title {
+                    font-size: 42px;
+                    margin-bottom: 30px;
+                    letter-spacing: 6px;
+                    color: #00ffcc;
+                    text-shadow: 0 0 20px rgba(0, 255, 204, 0.5);
+                }
+                .intro-description {
+                    font-size: 18px;
+                    line-height: 1.8;
+                    color: #fff;
+                    margin-bottom: 40px;
+                    white-space: pre-line;
+                    opacity: 0.9;
+                }
+                .slide-progress {
+                    display: flex;
+                    justify-content: center;
+                    gap: 12px;
+                    margin-bottom: 40px;
+                }
+                .progress-dot {
+                    width: 40px;
+                    height: 4px;
+                    background: rgba(255,255,255,0.2);
+                    border-radius: 2px;
+                    transition: all 0.3s;
+                }
+                .progress-dot.active {
+                    background: #00ffcc;
+                    box-shadow: 0 0 10px #00ffcc;
+                }
+                .intro-buttons {
+                    display: flex;
+                    gap: 20px;
+                    justify-content: center;
+                }
+            `}} />
+        </div>
+    );
+}
