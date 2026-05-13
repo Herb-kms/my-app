@@ -387,7 +387,7 @@ function GameContent() {
                             if (rotMod === 0 || rotMod === 2) {
                                 // Z축 진행 (-Z / +Z)
                                 newZ += rotMod === 0 ? -speed : speed;
-                                // X축 중심 맞추기 (회전/코너 보간)
+                                // X축 중심 맞추기
                                 let diffX = belt.position[0] - newX;
                                 let stepX = diffX * 0.15;
                                 if (stepX > speed) stepX = speed;
@@ -396,7 +396,7 @@ function GameContent() {
                             } else {
                                 // X축 진행 (-X / +X)
                                 newX += rotMod === 1 ? -speed : speed;
-                                // Z축 중심 맞추기 (회전/코너 보간)
+                                // Z축 중심 맞추기
                                 let diffZ = belt.position[2] - newZ;
                                 let stepZ = diffZ * 0.15;
                                 if (stepZ > speed) stepZ = speed;
@@ -407,7 +407,10 @@ function GameContent() {
                             return { ...item, position: [newX, item.position[1], newZ] };
                         }
 
-                        return { ...item, status: 'IDLE' }; // No belt under item
+                        // 벨트가 없으면 필드로 떨어뜨리기
+                        const dropItem = { ...item, id: `trash-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`, status: 'IDLE' };
+                        setItems(prev => [...prev, dropItem]);
+                        return null; // movingItems에서 제거됨 (filter(Boolean) 처리 필요)
 
                     } else if (item.status === 'PROCESSING') {
                         changed = true;
@@ -453,7 +456,7 @@ function GameContent() {
                     }
                     return item; // IDLE status
                 });
-                return changed ? nextItems : prevItems;
+                return changed ? nextItems.filter(Boolean) : prevItems;
             });
         }, 50);
         return () => clearInterval(interval);
