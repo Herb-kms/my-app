@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Text } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
+import { ShippingBin } from './EnvironmentComponents';
 // ─── 컨베이어 벨트 ────────────────────────────────────────────────────────────
 // placedBelts 배열을 받아 그리드에 맞게 배치
 // 벨트 타일은 그리드(2.5) 전체를 꽉 채워 틈 없이 연결되도록 설계
@@ -285,7 +286,6 @@ function PackagingMachine({ isActive }) {
         </group>
     );
 }
-
 // ─── 공장 기계 메인 ────────────────────────────────────────────────────────────
 export function Machine({ placedMachines = [], movingItems = [] }) {
     return (
@@ -298,10 +298,12 @@ export function Machine({ placedMachines = [], movingItems = [] }) {
                 return (
                     <group key={cfg.id} position={cfg.position} rotation={cfg.rotation}>
 
-                        {/* ── 하단 공통 베이스 플레이트 ─────── */}
-                        <Box args={[2.6, 0.25, 3.1]} position={[0, 0.12, 0]}>
-                            <meshStandardMaterial color="#2a2a2a" metalness={1} roughness={0.2} />
-                        </Box>
+                        {/* ── 하단 공통 베이스 플레이트 (판매존 제외) ─────── */}
+                        {cfg.type !== 'SHIPPING_BIN' && (
+                            <Box args={[2.6, 0.25, 3.1]} position={[0, 0.12, 0]}>
+                                <meshStandardMaterial color="#2a2a2a" metalness={1} roughness={0.2} />
+                            </Box>
+                        )}
 
                         {/* ── 기계 종류별 투박한 렌더링 ────────── */}
                         {cfg.type === 'SORTING' && <SortingMachine isActive={isActive} />}
@@ -309,6 +311,7 @@ export function Machine({ placedMachines = [], movingItems = [] }) {
                         {cfg.type === 'CLEANING' && <CleaningMachine isActive={isActive} />}
                         {cfg.type === 'DRYING' && <DryingMachine isActive={isActive} />}
                         {cfg.type === 'PACKAGING' && <PackagingMachine isActive={isActive} />}
+                        {cfg.type === 'SHIPPING_BIN' && <ShippingBin position={[0, 0, 0]} />}
 
                         {/* ── 입구 / 출구 공통 터널 가이드 ──────────────── */}
                         <Box args={[1.8, 0.6, 0.18]} position={[0, 0.55, 1.5]}>

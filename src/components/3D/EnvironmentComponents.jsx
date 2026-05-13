@@ -21,9 +21,9 @@ export function Floor({ graphicsQuality }) {
 }
 
 // 8. 판매용 배송함 (ShippingBin)
-export function ShippingBin() {
+export function ShippingBin({ position = [-10, 0, 10], rotation = [0, 0, 0] }) {
     return (
-        <group position={[-10, 0, 10]}>
+        <group position={position} rotation={rotation}>
             <Box args={[4, 0.2, 4]} receiveShadow position={[0, 0.1, 0]}>
                 <meshStandardMaterial color="#222" metalness={0.5} roughness={0.5} />
             </Box>
