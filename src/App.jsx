@@ -151,6 +151,7 @@ function GameContent() {
         { id: 'dm3', type: 'CLEANING', position: [0, 0, -10], rotation: [0, 0, 0] },
         { id: 'dm4', type: 'DRYING', position: [0, 0, -17.5], rotation: [0, 0, 0] },
         { id: 'dm5', type: 'PACKAGING', position: [0, 0, -25], rotation: [0, 0, 0] },
+        { id: 'dm-sell', type: 'SHIPPING_BIN', position: [-10, 0, 10], rotation: [0, 0, 0] },
     ];
 
     // 건축 모드 상태
@@ -320,12 +321,16 @@ function GameContent() {
             }
             if (e.code === 'KeyG' && selectedItem && !buildMode) {
                 const dropPos = [x + (Math.random() - 0.5) * 2, 0.3, z + (Math.random() - 0.5) * 2];
-                const shipPos = [-10, 0, 10];
-                const distToShip = Math.sqrt(Math.pow(x - shipPos[0], 2) + Math.pow(z - shipPos[2], 2));
+                // 설치된 모든 Sell Zone 중 가장 가까운 것 탐색
+                const nearestSellZone = placedMachines.find(m => 
+                    m.type === 'SHIPPING_BIN' && 
+                    Math.sqrt(Math.pow(x - m.position[0], 2) + Math.pow(z - m.position[2], 2)) < 5.0
+                );
 
-                if (distToShip < 5 && selectedItem.isProduct) {
-                    setMoney(prev => prev + (selectedItem.value || 10));
-                    setResults(prev => [`SOLD: ${selectedItem.type} for $${selectedItem.value || 10}`, ...prev].slice(0, 5));
+                if (nearestSellZone && (selectedItem.isProduct || selectedItem.type === 'Upcycled')) {
+                    const sellValue = selectedItem.value || 10;
+                    setMoney(prev => prev + sellValue);
+                    setResults(prev => [`SOLD: ${selectedItem.type} for $${sellValue}`, ...prev].slice(0, 5));
                 } else {
                     const newItemId = `trash-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
                     setItems(prev => [...prev, { ...selectedItem, position: dropPos, id: newItemId }]);
@@ -377,6 +382,16 @@ function GameContent() {
                         // Check Machine
                         const machine = placedMachines.find(m => Math.abs(m.position[0] - gridX) < 1.0 && Math.abs(m.position[2] - gridZ) < 1.0);
                         if (machine) {
+                            // 만약 판매 구역이라면 즉시 판매 처리
+                            if (machine.type === 'SHIPPING_BIN') {
+                                if (item.isProduct || item.type === 'Upcycled') {
+                                    const val = item.value || 10;
+                                    setMoney(prev => prev + val);
+                                    setResults(prev => [`SOLD: ${item.type} for $${val}`, ...prev].slice(0, 5));
+                                    changed = true;
+                                    return null; // 벨트에서 제거
+                                }
+                            }
                             return { ...item, status: 'PROCESSING', machineId: machine.id, machineProgress: 0 };
                         }
 
@@ -516,7 +531,6 @@ function GameContent() {
                 <Player playerRef={playerRef} perspective={settings.perspective} selectedItem={selectedItem} />
                 <FirstPersonHeldItem item={selectedItem} perspective={settings.perspective} />
                 <Floor graphicsQuality={settings.graphicsQuality} />
-                <ShippingBin />
                 <ConveyorBelt placedBelts={placedBelts} />
                 <Machine
                     placedMachines={placedMachines}
