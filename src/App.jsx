@@ -206,10 +206,16 @@ function GameContent() {
 
     const [money, setMoney] = useState(0);
     const [movingItems, setMovingItems] = useState([]);
+    const movingItemsRef = useRef([]); // 실시간 시뮬레이션용 레퍼런스
     const [results, setResults] = useState([]);
     const [isInventoryOpen, setIsInventoryOpen] = useState(false);
     const [canLock, setCanLock] = useState(true);
     const playerRef = useRef();
+
+    // movingItems 상태가 바뀔 때마다 레퍼런스 동기화
+    useEffect(() => {
+        movingItemsRef.current = movingItems;
+    }, [movingItems]);
 
     // 마우스 잠금 해제 시 쿨타임 적용 (브라우저 에러 방지)
     const handleUnlock = () => {
@@ -371,12 +377,14 @@ function GameContent() {
     useEffect(() => {
         if (gameState !== 'playing') return;
         const interval = setInterval(() => {
-            let soldAmount = 0; // 이번 틱에서 판매된 금액 합계
-            let salesLog = [];
+            const currentMoving = movingItemsRef.current;
+            if (currentMoving.length === 0 && items.length === 0) return;
 
-            setMovingItems(prevItems => {
-                let changed = false;
-                const nextItems = prevItems.map(item => {
+            let soldAmount = 0;
+            let salesLog = [];
+            let changed = false;
+
+            const nextItems = currentMoving.map(item => {
                     if (item.status === 'MOVING') {
                         changed = true;
                         const gridX = Math.round(item.position[0] / 2.5) * 2.5;
@@ -486,17 +494,18 @@ function GameContent() {
                     return item; // IDLE status
                 });
 
-                // 판매 내역이 있으면 돈과 로그 업데이트
-                if (soldAmount > 0) {
-                    setMoney(m => m + soldAmount);
-                    setResults(r => [...salesLog, ...r].slice(0, 5));
-                }
-
-                return changed ? nextItems.filter(Boolean) : prevItems;
             });
+
+            if (changed || soldAmount > 0) {
+                if (soldAmount > 0) {
+                    setMoney(prev => prev + soldAmount);
+                    setResults(prev => [...salesLog, ...prev].slice(0, 5));
+                }
+                setMovingItems(nextItems.filter(Boolean));
+            }
         }, 50);
         return () => clearInterval(interval);
-    }, [gameState, placedBelts, placedMachines]);
+    }, [gameState, placedBelts, placedMachines, items.length]);
 
     const handleInventoryClick = (idx) => {
         if (idx === undefined || idx === null) return;
