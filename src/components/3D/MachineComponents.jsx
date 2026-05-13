@@ -43,6 +43,48 @@ export function ConveyorBelt({ placedBelts = [] }) {
 
 // ─── 유틸리티 컴포넌트 ────────────────────────────────────────────────────────
 
+function RoboticArm({ position, rotation, isActive }) {
+    const joint1Ref = React.useRef();
+    const joint2Ref = React.useRef();
+    
+    useFrame((state) => {
+        if (!isActive) return;
+        const t = state.clock.getElapsedTime();
+        if (joint1Ref.current) {
+            joint1Ref.current.rotation.z = Math.sin(t * 3) * 0.5;
+            joint1Ref.current.rotation.y = Math.cos(t * 2) * 0.3;
+        }
+        if (joint2Ref.current) {
+            joint2Ref.current.rotation.z = Math.cos(t * 3) * 0.8;
+        }
+    });
+
+    return (
+        <group position={position} rotation={rotation}>
+            {/* 베이스 */}
+            <Box args={[0.4, 0.2, 0.4]}>
+                <meshStandardMaterial color="#333" />
+            </Box>
+            {/* 첫번째 관절 */}
+            <group ref={joint1Ref} position={[0, 0.1, 0]}>
+                <Box args={[0.15, 1.0, 0.15]} position={[0, 0.5, 0]}>
+                    <meshStandardMaterial color="#666" />
+                </Box>
+                {/* 두번째 관절 */}
+                <group ref={joint2Ref} position={[0, 1.0, 0]}>
+                    <Box args={[0.12, 0.8, 0.12]} position={[0, 0.4, 0]}>
+                        <meshStandardMaterial color="#888" />
+                    </Box>
+                    {/* 집게 / 헤드 */}
+                    <Box args={[0.3, 0.2, 0.3]} position={[0, 0.8, 0]}>
+                        <meshStandardMaterial color="#ffcc00" emissive="#ffcc00" emissiveIntensity={isActive ? 0.5 : 0} />
+                    </Box>
+                </group>
+            </group>
+        </group>
+    );
+}
+
 function WarningStripes({ position, width, rotation = [0, 0, 0], isRedWhite = true }) {
     const numStripes = Math.floor(width / 0.2);
     const color1 = isRedWhite ? "#dd2222" : "#222222";
@@ -93,42 +135,37 @@ function SortingMachine({ isActive }) {
     return (
         <group>
             {/* 좌/우 파란 벽 */}
-            <Box args={[0.5, 1.8, 3.0]} position={[0.95, 0.9, 0]}>
+            <Box args={[0.5, 2.2, 3.2]} position={[1.05, 1.1, 0]}>
                 <meshStandardMaterial color="#1f57a3" metalness={0.5} roughness={0.6} />
             </Box>
-            <Box args={[0.5, 1.8, 3.0]} position={[-0.95, 0.9, 0]}>
+            <Box args={[0.5, 2.2, 3.2]} position={[-1.05, 1.1, 0]}>
                 <meshStandardMaterial color="#1f57a3" metalness={0.5} roughness={0.6} />
             </Box>
             {/* 상단 덮개 */}
-            <Box args={[2.4, 0.8, 3.0]} position={[0, 2.2, 0]}>
+            <Box args={[2.6, 0.6, 3.2]} position={[0, 2.5, 0]}>
                 <meshStandardMaterial color="#1f57a3" metalness={0.5} roughness={0.6} />
             </Box>
 
+            {/* 로봇 팔 추가 (스캐닝 느낌) */}
+            <RoboticArm position={[0, 2.5, 0]} rotation={[Math.PI, 0, 0]} isActive={isActive} />
+
             {/* 터널 입구 가림막 */}
-            <Box args={[2.4, 1.2, 0.2]} position={[0, 1.4, 1.4]}>
+            <Box args={[2.4, 1.2, 0.2]} position={[0, 1.4, 1.5]}>
                 <meshStandardMaterial color="#163f75" />
             </Box>
-            <Box args={[2.4, 1.2, 0.2]} position={[0, 1.4, -1.4]}>
+            <Box args={[2.4, 1.2, 0.2]} position={[0, 1.4, -1.5]}>
                 <meshStandardMaterial color="#163f75" />
             </Box>
 
             {/* 내부 스캐너 빛 */}
             {isActive && (
                 <Box args={[1.8, 0.1, 1.8]} position={[0, 1.0, 0]}>
-                    <meshStandardMaterial color="#00ffcc" emissive="#00ffcc" emissiveIntensity={1} transparent opacity={0.5} />
+                    <meshStandardMaterial color="#00ffcc" emissive="#00ffcc" emissiveIntensity={2} transparent opacity={0.6} />
                 </Box>
             )}
 
-            {/* 측면 경고 표지판 */}
-            <Box args={[0.6, 0.4, 0.05]} position={[1.22, 1.2, 0.5]} rotation={[0, Math.PI / 2, 0]}>
-                <meshStandardMaterial color="#ddd" />
-            </Box>
-            <Box args={[0.2, 0.2, 0.06]} position={[1.22, 1.2, 0.5]} rotation={[0, Math.PI / 2, 0]}>
-                <meshStandardMaterial color="#c00" />
-            </Box>
-
-            <WarningStripes position={[1.25, 0.1, 0]} width={3.0} rotation={[0, Math.PI / 2, 0]} isRedWhite={true} />
-            <WarningStripes position={[-1.25, 0.1, 0]} width={3.0} rotation={[0, -Math.PI / 2, 0]} isRedWhite={true} />
+            <WarningStripes position={[1.35, 0.1, 0]} width={3.2} rotation={[0, Math.PI / 2, 0]} isRedWhite={true} />
+            <WarningStripes position={[-1.35, 0.1, 0]} width={3.2} rotation={[0, -Math.PI / 2, 0]} isRedWhite={true} />
 
             <ControlPanel position={[-1.5, 0, 0]} rotation={[0, -Math.PI / 2, 0]} />
         </group>
@@ -197,33 +234,40 @@ function CleaningMachine({ isActive }) {
     return (
         <group>
             {/* 좌/우 초록 벽 */}
-            <Box args={[0.6, 2.4, 2.6]} position={[0.9, 1.2, 0]}>
+            <Box args={[0.6, 2.6, 2.8]} position={[1.0, 1.3, 0]}>
                 <meshStandardMaterial color="#2e7d32" metalness={0.3} roughness={0.8} />
             </Box>
-            <Box args={[0.6, 2.4, 2.6]} position={[-0.9, 1.2, 0]}>
+            <Box args={[0.6, 2.6, 2.8]} position={[-1.0, 1.3, 0]}>
                 <meshStandardMaterial color="#2e7d32" metalness={0.3} roughness={0.8} />
             </Box>
             
-            {/* 두꺼운 배관 장식 */}
-            <mesh position={[1.3, 1.2, 0]}>
-                <cylinderGeometry args={[0.2, 0.2, 2.2, 16]} />
+            {/* 로봇 팔 (세척 노즐 역할) */}
+            <RoboticArm position={[0, 2.8, 0]} rotation={[Math.PI, 0, 0]} isActive={isActive} />
+
+            {/* 배관 장식 */}
+            <mesh position={[1.4, 1.3, 0.5]}>
+                <cylinderGeometry args={[0.15, 0.15, 2.4, 16]} />
+                <meshStandardMaterial color="#999" metalness={0.8} />
+            </mesh>
+            <mesh position={[1.4, 1.3, -0.5]}>
+                <cylinderGeometry args={[0.15, 0.15, 2.4, 16]} />
                 <meshStandardMaterial color="#999" metalness={0.8} />
             </mesh>
 
-            {/* 거대한 상단 물탱크 (사각) */}
-            <Box args={[2.4, 1.0, 2.6]} position={[0, 2.9, 0]}>
+            {/* 상단 물탱크 */}
+            <Box args={[2.6, 0.8, 2.8]} position={[0, 3.0, 0]}>
                 <meshStandardMaterial color="#1b5e20" />
             </Box>
 
-            {/* 세척 물줄기 효과 (내부) */}
+            {/* 세척 물줄기 효과 */}
             {isActive && (
-                <Box args={[1.4, 1.4, 1.4]} position={[0, 0.8, 0]}>
-                    <meshStandardMaterial color="#00aaff" transparent opacity={0.3} emissive="#00aaff" emissiveIntensity={0.5} />
+                <Box args={[1.6, 1.6, 1.6]} position={[0, 0.8, 0]}>
+                    <meshStandardMaterial color="#00aaff" transparent opacity={0.4} emissive="#00aaff" emissiveIntensity={1} />
                 </Box>
             )}
 
-            <WarningStripes position={[1.25, 0.1, 0]} width={2.6} rotation={[0, Math.PI / 2, 0]} isRedWhite={false} />
-            <WarningStripes position={[-1.25, 0.1, 0]} width={2.6} rotation={[0, -Math.PI / 2, 0]} isRedWhite={false} />
+            <WarningStripes position={[1.35, 0.1, 0]} width={2.8} rotation={[0, Math.PI / 2, 0]} isRedWhite={false} />
+            <WarningStripes position={[-1.35, 0.1, 0]} width={2.8} rotation={[0, -Math.PI / 2, 0]} isRedWhite={false} />
             
             <ControlPanel position={[1.6, 0, 1.0]} rotation={[0, Math.PI / 4, 0]} />
         </group>
@@ -268,28 +312,31 @@ function PackagingMachine({ isActive }) {
     return (
         <group>
             {/* 하얀색 두꺼운 벽 */}
-            <Box args={[0.7, 2.0, 2.6]} position={[0.85, 1.0, 0]}>
-                <meshStandardMaterial color="#e0e0e0" metalness={0.2} roughness={0.8} />
+            <Box args={[0.7, 2.4, 3.0]} position={[0.95, 1.2, 0]}>
+                <meshStandardMaterial color="#f0f0f0" metalness={0.4} roughness={0.6} />
             </Box>
-            <Box args={[0.7, 2.0, 2.6]} position={[-0.85, 1.0, 0]}>
-                <meshStandardMaterial color="#e0e0e0" metalness={0.2} roughness={0.8} />
+            <Box args={[0.7, 2.4, 3.0]} position={[-0.95, 1.2, 0]}>
+                <meshStandardMaterial color="#f0f0f0" metalness={0.4} roughness={0.6} />
             </Box>
 
+            {/* 로봇 팔 (포장 테이핑 역할) */}
+            <RoboticArm position={[0, 2.6, 0]} rotation={[Math.PI, 0, 0]} isActive={isActive} />
+
             {/* 녹색 프레임 지붕 */}
-            <Box args={[2.4, 0.6, 2.6]} position={[0, 2.3, 0]}>
+            <Box args={[2.6, 0.4, 3.0]} position={[0, 2.6, 0]}>
                 <meshStandardMaterial color="#2e7d32" />
             </Box>
 
-            {/* 전면 롤 (비닐/종이) - 실린더 가로로 배치 */}
-            <mesh position={[0, 2.3, 1.0]} rotation={[0, 0, Math.PI / 2]}>
-                <cylinderGeometry args={[0.4, 0.4, 2.0, 16]} />
-                <meshStandardMaterial color="#cda434" roughness={0.9} /> {/* 갈색 종이 롤 느낌 */}
+            {/* 전면 롤 */}
+            <mesh position={[0, 2.3, 1.2]} rotation={[0, 0, Math.PI / 2]}>
+                <cylinderGeometry args={[0.3, 0.3, 2.2, 16]} />
+                <meshStandardMaterial color="#cda434" roughness={0.9} />
             </mesh>
 
-            <WarningStripes position={[1.25, 0.1, 0]} width={2.6} rotation={[0, Math.PI / 2, 0]} isRedWhite={false} />
-            <WarningStripes position={[-1.25, 0.1, 0]} width={2.6} rotation={[0, -Math.PI / 2, 0]} isRedWhite={false} />
+            <WarningStripes position={[1.35, 0.1, 0]} width={3.0} rotation={[0, Math.PI / 2, 0]} isRedWhite={false} />
+            <WarningStripes position={[-1.35, 0.1, 0]} width={3.0} rotation={[0, -Math.PI / 2, 0]} isRedWhite={false} />
             
-            <ControlPanel position={[1.5, 0, -1.0]} rotation={[0, Math.PI / 4 * 3, 0]} />
+            <ControlPanel position={[1.6, 0, -1.0]} rotation={[0, Math.PI / 4 * 3, 0]} />
         </group>
     );
 }
