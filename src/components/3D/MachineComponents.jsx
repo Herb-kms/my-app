@@ -57,51 +57,6 @@ export function ConveyorBelt({ placedBelts = [] }) {
 // 2. 재사용 가능한 공용 기계 부품들 (유틸리티 컴포넌트)
 // ========================================================================
 
-/**
- * 기계 외부에 부착되는 로봇 팔 장식입니다.
- * 기계가 작동 중(isActive)일 때만 useFrame을 통해 삼각함수(sin, cos) 기반으로 부드럽게 움직입니다.
- */
-function RoboticArm({ position, rotation, isActive }) {
-    const joint1Ref = React.useRef();
-    const joint2Ref = React.useRef();
-
-    useFrame((state) => {
-        if (!isActive) return;
-        const t = state.clock.getElapsedTime();
-        if (joint1Ref.current) {
-            joint1Ref.current.rotation.z = Math.sin(t * 3) * 0.5;
-            joint1Ref.current.rotation.y = Math.cos(t * 2) * 0.3;
-        }
-        if (joint2Ref.current) {
-            joint2Ref.current.rotation.z = Math.cos(t * 3) * 0.8;
-        }
-    });
-
-    return (
-        <group position={position} rotation={rotation}>
-            {/* 베이스 */}
-            <Box args={[0.4, 0.2, 0.4]}>
-                <meshStandardMaterial color="#333" />
-            </Box>
-            {/* 첫번째 관절 */}
-            <group ref={joint1Ref} position={[0, 0.1, 0]}>
-                <Box args={[0.15, 1.0, 0.15]} position={[0, 0.5, 0]}>
-                    <meshStandardMaterial color="#666" />
-                </Box>
-                {/* 두번째 관절 */}
-                <group ref={joint2Ref} position={[0, 1.0, 0]}>
-                    <Box args={[0.12, 0.8, 0.12]} position={[0, 0.4, 0]}>
-                        <meshStandardMaterial color="#888" />
-                    </Box>
-                    {/* 집게 / 헤드 (작동 시 노란 빛 발산) */}
-                    <Box args={[0.3, 0.2, 0.3]} position={[0, 0.8, 0]}>
-                        <meshStandardMaterial color="#ffcc00" emissive="#ffcc00" emissiveIntensity={isActive ? 0.5 : 0} />
-                    </Box>
-                </group>
-            </group>
-        </group>
-    );
-}
 
 /**
  * 기계 하단에 둘러쳐지는 공사현장 스타일의 위험 경고 띠(노랑-검정 또는 빨강-흰색)입니다.

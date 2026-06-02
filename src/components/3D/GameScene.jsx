@@ -1,6 +1,6 @@
 import React, { Suspense, useEffect, useState } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
-import { KeyboardControls, PerspectiveCamera, Sky, Stars, ContactShadows, Environment, Text, Float, Billboard } from '@react-three/drei';
+import { KeyboardControls, PerspectiveCamera, Stars, ContactShadows, Environment, Text, Float, Billboard } from '@react-three/drei';
 import * as THREE from 'three';
 import { Physics } from '@react-three/cannon';
 

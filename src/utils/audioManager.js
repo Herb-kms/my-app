@@ -58,7 +58,7 @@ export const playSlideTransition = () => {
 
 export const getVolumeByDistance = (sourcePos, playerPosRef) => {
     if (!sourcePos || !playerPosRef || !playerPosRef.current) return masterVolume;
-    const [px, py, pz] = playerPosRef.current;
+    const [px, , pz] = playerPosRef.current;
     const dx = sourcePos[0] - px;
     const dz = sourcePos[2] - pz;
     const distance = Math.sqrt(dx * dx + dz * dz);

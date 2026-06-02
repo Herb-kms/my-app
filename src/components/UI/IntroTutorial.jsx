@@ -62,7 +62,7 @@ export function IntroTutorial({ onComplete }) {
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current);
         };
-    }, [currentSlide]);
+    }, [currentSlide, slide.description]);
 
     const nextSlide = () => {
         playTransition();

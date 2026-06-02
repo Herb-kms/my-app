@@ -120,8 +120,6 @@ export function PlayerController({
         // ── 수평 이동 ──────────────────────────────────
         // 속도를 delta와 sensitivity에 맞춤 (기본 속도 상향)
         const moveSpeed = 10 * delta;
-        const frontVector = new THREE.Vector3(0, 0, Number(backward) - Number(forward));
-        const sideVector  = new THREE.Vector3(Number(left) - Number(right), 0, 0);
         const direction   = new THREE.Vector3();
 
         // 카메라 방향 기준 이동 (Y축 무시)
