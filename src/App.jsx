@@ -435,7 +435,7 @@ function GameContent() {
             window.removeEventListener('keydown', onKeyDown); 
             window.removeEventListener('wheel', onWheel); 
         };
-    }, [gameState, currentDay, isInventoryOpen, isSettingsOpen, isBuildInventoryOpen, handleChargeInteraction]);
+    }, [gameState, currentDay, isInventoryOpen, isSettingsOpen, isBuildInventoryOpen, handleChargeInteraction, setCurrentDay, setGameHour, setGameMinute, setShippedPurifierCore, setTutorialStep]);
 
     // ========================================================================
     // 6. 컴포넌트 렌더링
