@@ -51,6 +51,14 @@ export function BuilderController({ buildMode, selectedBuildItem, onPlaceItem, o
         }
     });
 
+    const hologramPosRef = useRef([0, 0, 0]);
+    const rotationIdxRef = useRef(0);
+
+    useEffect(() => {
+        hologramPosRef.current = hologramPos;
+        rotationIdxRef.current = rotationIdx;
+    }, [hologramPos, rotationIdx]);
+
     useEffect(() => {
         if (!buildMode || !itemType) return;
         const handleMouseClick = (e) => {
@@ -58,22 +66,21 @@ export function BuilderController({ buildMode, selectedBuildItem, onPlaceItem, o
                 if (e.button === 0) {
                     onPlaceItem?.({
                         type: itemType,
-                        position: hologramPos,
-                        rotation: [0, rotationIdx * (Math.PI / 2), 0]
+                        position: hologramPosRef.current,
+                        rotation: [0, rotationIdxRef.current * (Math.PI / 2), 0]
                     });
                 } else if (e.button === 2 && onDemolishItem) {
-                    onDemolishItem([hologramPos[0], hologramPos[2]]);
+                    onDemolishItem([hologramPosRef.current[0], hologramPosRef.current[2]]);
                 }
             }
         };
         window.addEventListener('mousedown', handleMouseClick);
         return () => window.removeEventListener('mousedown', handleMouseClick);
-    }, [buildMode, hologramPos, rotationIdx, itemType, onPlaceItem, onDemolishItem]);
+    }, [buildMode, itemType, onPlaceItem, onDemolishItem]);
 
     if (!buildMode || !itemType) return null;
 
     const isBelt = itemType === 'CONVEYOR';
-    const isMachine = ['SORTING', 'CRUSHING', 'CLEANING', 'DRYING', 'PACKAGING', 'SHIPPING_BIN'].includes(itemType);
     const isProp = ['SHELF', 'CRATE', 'BARREL', 'WALL'].includes(itemType);
     const isSpawnItem = itemType.startsWith?.('ITEM_');
 
@@ -99,7 +106,7 @@ export function BuilderController({ buildMode, selectedBuildItem, onPlaceItem, o
                 <meshStandardMaterial color={color} opacity={0.12} transparent />
             </Box>
             <Text position={[0, labelY, 0]} fontSize={0.45} outlineWidth={0.04} outlineColor="black" color={color}>
-                {isSpawnItem ? itemType.replace('ITEM_', '') : itemType}
+                {typeof selectedBuildItem === 'object' ? selectedBuildItem.name : itemType}
             </Text>
             <Box args={[0.4, 0.4, 1.2]} position={[0, 0.3, -size[2] / 2 - 0.4]}>
                 <meshStandardMaterial color="yellow" emissive="yellow" emissiveIntensity={0.8} />

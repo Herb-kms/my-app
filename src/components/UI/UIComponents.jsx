@@ -1,42 +1,59 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { BUILD_CATALOG } from '../../data/constants';
 
-// 1. 메인 로비 컴포넌트
-export function Lobby({ onStart }) {
+const ItemImage = ({ item, size = '70%' }) => {
+    if (!item) return null;
+    const type = item.type || item.id;
+    let imgUrl = "https://img.icons8.com/3d-fluency/94/gears.png";
+    if (type.includes('Can') || type.includes('CAN')) imgUrl = "https://img.icons8.com/3d-fluency/94/tin-can.png";
+    else if (type.includes('Plastic') || type.includes('PLASTIC')) imgUrl = "https://img.icons8.com/3d-fluency/94/water-bottle.png";
+    else if (type.includes('Glass') || type.includes('GLASS')) imgUrl = "https://img.icons8.com/3d-fluency/94/wine-bottle.png";
+    else if (type === 'CRATE') imgUrl = "https://img.icons8.com/3d-fluency/94/box.png";
+    else if (type === 'BARREL') imgUrl = "https://img.icons8.com/3d-fluency/94/barrel.png";
+    else if (type === 'WALL') imgUrl = "https://img.icons8.com/3d-fluency/94/brick-wall.png";
+    else if (type === 'SHIPPING_BIN') imgUrl = "https://img.icons8.com/3d-fluency/94/safe.png";
+    else if (type === 'Upcycled' || type.includes('재생') || type.includes('주괴')) imgUrl = "https://img.icons8.com/3d-fluency/94/sparkling-diamond.png";
+    else if (type === 'CONVEYOR') imgUrl = "https://img.icons8.com/3d-fluency/94/conveyor-belt.png";
+
     return (
-        <div className="start-screen">
-            <div className="start-card glass-panel">
-                <div className="badge">RECYCLING SIMULATOR</div>
-                <h1>PREMIUM FACTORY v2.1</h1>
-                <p>U-Shape Process & Modular Management</p>
-
-                <div className="feature-grid">
-                    <div className="feature-item">
-                        <span className="icon">🏗️</span>
-                        <span>U-Layout</span>
-                    </div>
-                    <div className="feature-item">
-                        <span className="icon">📦</span>
-                        <span>Inventory</span>
-                    </div>
-                    <div className="feature-item">
-                        <span className="icon">⚙️</span>
-                        <span>Morphism</span>
-                    </div>
-                </div>
-
-                <div className="start-controls">
-                    <button className="start-button" onClick={onStart}>
-                        스마트 팩토리 프로젝트 시작
-                    </button>
-                    <div className="control-badges">
-                        <span className="badge-item">WASD Move</span>
-                        <span className="badge-item">Mouse Aim</span>
-                    </div>
-                </div>
-            </div>
+        <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <img 
+                src={imgUrl} 
+                alt={item.name} 
+                style={{ width: size, height: size, objectFit: 'contain', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.5))' }} 
+                onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'inline'; }} 
+            />
+            <span style={{ display: 'none', fontSize: size === '80%' ? '24px' : '20px' }}>{item.icon || '📦'}</span>
         </div>
     );
-}
+};
+
+
+
+
+// 동적 레시피 결과 계산 함수
+const getExpectedResult = (itemName, itemType, machineName) => {
+    if (machineName === "최종 포장기") {
+        if (itemType.includes("Can")) return { name: "알루미늄 주괴", type: "알루미늄 주괴" };
+        if (itemType.includes("Plastic")) return { name: "재생 플라스틱 칩", type: "재생 플라스틱 칩" };
+        if (itemType.includes("Glass")) return { name: "재생 유리 파쇄물", type: "재생 유리 파쇄물" };
+    }
+    
+    const prefixMap = {
+        "자동 분류기": "분류된 ",
+        "압착 파쇄기": "파쇄된 ",
+        "고압 세척기": "세척된 ",
+        "열풍 건조기": "건조된 "
+    };
+    const prefix = prefixMap[machineName] || "";
+    
+    let base = itemName || itemType;
+    if (base.includes("폐알루미늄") || base.includes("Can")) base = "알루미늄 캔";
+    else if (base.includes("폐플라스틱") || base.includes("Plastic")) base = "플라스틱";
+    else if (base.includes("폐유리") || base.includes("Glass")) base = "유리";
+    
+    return { name: prefix + base, type: itemType };
+};
 
 // 2. HUD (In-Game UI)
 export function HUD({
@@ -45,8 +62,7 @@ export function HUD({
     isProcessing,
     isStationary,
     STAGES,
-    currentStageIdx,
-    stageProgress,
+    processingItems,
     inventory,
     results,
     selectedItem,
@@ -54,73 +70,105 @@ export function HUD({
     isInventoryOpen,
     onInventoryClick,
     buildMode,
-    activeHotbarSlot
+    activeHotbarSlot,
+    oxygen = 100
 }) {
     return (
         <div className={`game-gui ${isInventoryOpen ? 'inventory-view' : ''}`}>
-            {/* Header: Title and Controls */}
-            <header className="header glass-panel">
-                <div className="header-actions">
-                    <h1>RECYCLING FACTORY <span style={{ color: 'var(--accent)' }}>V3.0</span></h1>
-                    <div className="balance-display glass-panel">
-                        <span style={{ fontSize: '12px', opacity: 0.6 }}>BALANCE</span>
-                        <span style={{ color: '#4caf50', fontWeight: '900', fontSize: '20px' }}>${money.toLocaleString()}</span>
+            {/* Header: Minimal UI */}
+            <header className="header-minimal">
+                <div className="title-section" style={{ display: 'flex', alignItems: 'center', gap: '30px', flexWrap: 'wrap' }}>
+                    <h1 style={{ margin: 0, fontSize: '32px' }}>RECYCLING<br/><span style={{ color: 'var(--accent)' }}>FACTORY</span></h1>
+                    <div className="balance-badge" style={{ padding: '12px 24px', borderRadius: '35px', border: '2px solid rgba(0, 255, 204, 0.4)', boxShadow: '0 0 15px rgba(0, 255, 204, 0.2)' }}>
+                        <span className="money-icon" style={{ fontSize: '28px' }}>$</span>
+                        <span className="money-value" style={{ fontSize: '30px', fontWeight: '900' }}>{money.toLocaleString()}</span>
                     </div>
-                    <button className="quit-button" onClick={() => setGameState('lobby')}>QUIT TO LOBBY</button>
                 </div>
-                <div className="controls-hint">
-                    <span className="kb-key">WASD</span> MOVE
-                    <span className="kb-key">SPACE</span> JUMP
-                    <span className="kb-key">F5</span> {`${buildMode ? 'BUILD' : (isInventoryOpen ? 'STORAGE' : 'VIEW')}`} |
-                    <span className="kb-key">B</span> BUILD
-                    <span className="kb-key">ESC</span> SETTINGS
-                    <span className="kb-key">V</span> CATALOG
-                    <span className="kb-key">TAB</span> STORAGE
-                    <span className="kb-key">F</span> PICKUP
-                    <span className="kb-key">G</span> DROP
-                </div>
+                <button className="quit-minimal" onClick={() => setGameState('lobby')}>EXIT</button>
             </header>
 
-            {/* Central Processing Status */}
-            {isProcessing && (
-                <div className="processing-overlay glass-panel">
-                    <div className="processing-label">
-                        {!isStationary ? (
-                            <span style={{ color: '#aaa', fontSize: '12px' }}>MOVING TO {STAGES[currentStageIdx]}...</span>
-                        ) : (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                                <span className="badge">ACTIVE</span>
-                                <span style={{ color: '#4caf50', fontSize: '18px', fontWeight: '900' }}>{STAGES[currentStageIdx]}</span>
+            {/* Top Right Processing Status List */}
+            {isProcessing && processingItems && processingItems.length > 0 && (
+                <div className="processing-container-right" style={{ right: buildMode ? '320px' : '40px' }}>
+                    <div className="processing-container-title">
+                        SYSTEM OPERATIONS
+                    </div>
+                    {processingItems.slice(0, 5).map((item) => {
+                        const STAGE_COLORS = ['#55aaff', '#ffcc00', '#00ffcc', '#ff5500', '#d477ff'];
+                        const stageColor = STAGE_COLORS[item.stageIdx] || 'var(--accent)';
+                        const expected = getExpectedResult(item.name, item.type, item.machineName);
+                        
+                        return (
+                            <div key={item.id} className="processing-indicator-item" style={{ borderLeft: `4px solid ${stageColor}` }}>
+                                {/* 타이틀 (기계 이름) */}
+                                <div className="processing-text" style={{ marginBottom: '8px' }}>
+                                    <span style={{ color: stageColor }}>{item.machineName} 진행 중</span>
+                                    <span style={{ fontSize: '9px', opacity: 0.5 }}>{Math.floor(item.progress)}%</span>
+                                </div>
+
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                    {/* 현재 아이템 (입력) */}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+                                        <div style={{ width: '24px', height: '24px', flexShrink: 0 }}>
+                                            <ItemImage item={{ type: item.type }} size="100%" />
+                                        </div>
+                                        <span style={{ fontSize: '10px', opacity: 0.8, wordBreak: 'keep-all', lineHeight: '1.2' }}>
+                                            {item.name}
+                                        </span>
+                                    </div>
+
+                                    {/* 진행 상태 (중앙) */}
+                                    <div style={{ display: 'flex', alignItems: 'center', margin: '0 10px', flexShrink: 0 }}>
+                                        <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '14px' }}>➔</span>
+                                    </div>
+
+                                    {/* 결과 아이템 (출력) */}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, justifyContent: 'flex-end', textAlign: 'right' }}>
+                                        <span style={{ fontSize: '10px', fontWeight: 'bold', color: '#fff', wordBreak: 'keep-all', lineHeight: '1.2' }}>
+                                            {expected.name}
+                                        </span>
+                                        <div style={{ width: '24px', height: '24px', flexShrink: 0 }}>
+                                            <ItemImage item={{ type: expected.type }} size="100%" />
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="processing-bar-bg">
+                                    <div className="processing-bar-fill" style={{ width: `${item.progress}%`, background: stageColor, boxShadow: `0 0 10px ${stageColor}` }} />
+                                </div>
                             </div>
-                        )}
-                    </div>
-                    <div className="progress-bar-container">
-                        <div className="progress-fill" style={{ width: `${stageProgress}%` }} />
-                    </div>
+                        );
+                    })}
+                    {processingItems.length > 5 && (
+                        <div className="processing-more-text">
+                            + 그 외 {processingItems.length - 5}개 작업 진행 중...
+                        </div>
+                    )}
                 </div>
             )}
 
             {/* Bottom HUD: Stats and Inventory */}
-            <div className="hud-bottom">
-                <div className="stats-panel glass-panel">
-                    <div className="inventory-title">SYSTEM LOGS</div>
-                    <div className="results-log">
-                        {results.map((res, i) => (
-                            <div key={i} style={{ color: res.includes('SUCCESS') ? '#00ff88' : '#fff', opacity: 1 - i * 0.2, fontSize: '13px' }}>
-                                • {res}
+            <div className="hud-bottom-minimal">
+                <div className="log-panel">
+                    <div className="panel-title">SYSTEM LOG</div>
+                    <div className="results-log-minimal">
+                        {results.slice(-4).map((res, i) => (
+                            <div key={i} className="log-entry" style={{ color: res.includes('성공') || res.includes('판매') ? '#00ffcc' : '#ffffff88' }}>
+                                {res}
                             </div>
                         ))}
                     </div>
                 </div>
 
-                <div className="inventory-panel glass-panel">
-                    <div className="inventory-title">ACTIVE ITEM</div>
+                <div className="equipped-panel">
+                    <div className="panel-title">EQUIPPED</div>
                     {selectedItem ? (
-                        <div className="inventory-item" style={{ fontSize: '18px', fontWeight: 'bold' }}>
-                            <span style={{ color: selectedItem.color || '#fff' }}>●</span> {selectedItem.name || selectedItem.type || 'Unknown'}
+                        <div className="equipped-item">
+                            <span className="equipped-dot" style={{ backgroundColor: selectedItem.color || '#fff' }}></span>
+                            {selectedItem.name || selectedItem.type || 'UNKNOWN'}
                         </div>
                     ) : (
-                        <div className="inventory-item" style={{ opacity: 0.3 }}>EMPTY HANDS</div>
+                        <div className="equipped-item empty">EMPTY HANDS</div>
                     )}
                 </div>
             </div>
@@ -129,67 +177,105 @@ export function HUD({
             {isInventoryOpen && (
                 <div className="inventory-full-overlay">
                     <div className="storage-grid glass-panel">
-                        <h2 style={{ margin: '0 0 20px 0', letterSpacing: '4px' }}>FACTORY STORAGE</h2>
-                        <div className="grid-layout">
-                            {[...Array(16)].map((_, i) => (
+                        <h2 style={{ margin: '0 0 20px 0', letterSpacing: '4px' }}>공장 보관함</h2>
+                        <div className="grid-layout" style={{ gridTemplateColumns: 'repeat(10, 1fr)' }}>
+                            {[...Array(10)].map((_, i) => (
                                 <div
                                     key={i}
                                     className="grid-slot"
                                     onClick={() => onInventoryClick(i)}
-                                    style={{ border: i < 8 ? '1px solid rgba(0, 255, 204, 0.4)' : undefined }}
+                                    draggable={!!(inventory && inventory[i])}
+                                    onDragStart={(e) => {
+                                        e.dataTransfer.setData('sourceIdx', i);
+                                        e.dataTransfer.setData('type', 'storage');
+                                    }}
+                                    onDragOver={(e) => e.preventDefault()}
+                                    onDrop={(e) => {
+                                        e.preventDefault();
+                                        const sourceIdx = e.dataTransfer.getData('sourceIdx');
+                                        const sourceType = e.dataTransfer.getData('type');
+                                        if (sourceType === 'storage') onInventoryClick(i, parseInt(sourceIdx));
+                                    }}
+                                    style={{ border: '1px solid rgba(0, 255, 204, 0.4)' }}
                                 >
                                     {inventory && inventory[i] ? (
                                         <div className="item-preview">
-                                            {inventory[i].icon ? (
-                                                <span style={{ fontSize: '24px' }}>{inventory[i].icon}</span>
-                                            ) : (
-                                                <div className="item-color" style={{ backgroundColor: inventory[i].color || '#fff' }} />
-                                            )}
-                                            <span>{inventory[i].name || inventory[i].type || 'Unknown'}</span>
+                                            <div className="icon-chip" style={{ backgroundColor: `${inventory[i].color}22`, borderColor: `${inventory[i].color}44` }}>
+                                                <ItemImage item={inventory[i]} size="70%" />
+                                            </div>
+                                            <span style={{ fontSize: '9px', textAlign: 'center', marginTop: '4px', whiteSpace: 'nowrap', fontWeight: 'bold' }}>{inventory[i].name || inventory[i].type}</span>
                                         </div>
                                     ) : (
-                                        <span style={{ opacity: i < 8 ? 0.3 : 0.1, fontSize: '24px' }}>{i < 8 ? i + 1 : '+'}</span>
+                                        <span style={{ opacity: 0.3, fontSize: '24px' }}>{i === 9 ? 0 : i + 1}</span>
                                     )}
                                 </div>
                             ))}
                         </div>
-                        <div className="close-hint">CLICK TO SWAP • TAB TO CLOSE</div>
+                        <div className="close-hint">드래그해서 위치 변경 • 클릭해서 장착 • TAB을 눌러 닫기</div>
                     </div>
                 </div>
             )}
 
             {/* Build Mode HUD Overlay */}
             {gameState === 'playing' && buildMode && (
-                <div className="build-mode-overlay" style={{
-                    position: 'absolute', bottom: '120px', left: '50%', transform: 'translateX(-50%)',
-                    background: 'rgba(0,0,0,0.8)', padding: '20px', borderRadius: '15px', color: '#00ffcc',
-                    border: '1px solid #00ffcc', display: 'flex', gap: '20px', pointerEvents: 'none'
-                }}>
-                    <div style={{ fontWeight: 'bold', color: '#ffcc00' }}>[B] BUILD ON/OFF</div>
-                    <div style={{ fontWeight: 'bold' }}>[V] OPEN CATALOG</div>
-                    <div>[Q/E] ROTATE</div>
-                    <div>[L-CLICK] BUILD</div>
-                    <div style={{ color: '#ff4444' }}>[R-CLICK] DEMOLISH</div>
+                <div className="build-hud-minimal">
+                    <div className="build-header">
+                        <span className="build-icon">🏗️</span>
+                        <div>
+                            <div className="build-title">BUILD MODE</div>
+                            <div className="build-subtitle">Clearance granted</div>
+                        </div>
+                    </div>
+                    <div className="build-controls">
+                        <div><span>Open Catalog</span> <strong>V</strong></div>
+                        <div><span>Rotate Item</span> <strong>Q / E</strong></div>
+                        <div><span>Place Item</span> <strong style={{color: 'var(--accent)'}}>L-Click</strong></div>
+                        <div><span>Remove Item</span> <strong style={{color: 'var(--danger)'}}>R-Click</strong></div>
+                    </div>
+                    {selectedItem && (
+                        <div className="build-selected">
+                            <div className="build-selected-label">SELECTED UNIT</div>
+                            <div className="build-selected-name">{selectedItem.icon} {selectedItem.name}</div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* 산소 필터 게이지 - 핫바 위에 표시 */}
+            {gameState === 'playing' && !isInventoryOpen && (
+                <div className="oxygen-above-hotbar">
+                    <span className="oxygen-label" style={{ fontSize: '10px', letterSpacing: '1.5px', opacity: 0.7 }}>SUIT FILTER</span>
+                    <div className="oxygen-bar-outer" style={{ width: '220px', margin: '0 10px' }}>
+                        <div
+                            className="oxygen-bar-inner"
+                            style={{
+                                width: `${oxygen}%`,
+                                backgroundColor: oxygen < 20 ? '#ff0055' : oxygen < 30 ? '#ff6600' : '#00aaff',
+                                boxShadow: oxygen < 20 ? '0 0 12px #ff0055' : oxygen < 30 ? '0 0 10px #ff6600' : '0 0 10px #00aaff',
+                                transition: 'width 0.8s ease, background-color 0.5s'
+                            }}
+                        />
+                    </div>
+                    <span className="oxygen-value" style={{ color: oxygen < 20 ? '#ff0055' : oxygen < 30 ? '#ff6600' : '#00aaff', fontSize: '13px', fontWeight: '800' }}>
+                        {Math.floor(oxygen)}%
+                    </span>
                 </div>
             )}
 
             {/* Minecraft Style Hotbar */}
             {gameState === 'playing' && !isInventoryOpen && (
-                <div className="hotbar-container glass-panel">
-                    {inventory && inventory.slice(0, 8).map((item, index) => {
-                        const slotNumber = index + 1;
-                        const isActive = activeHotbarSlot === slotNumber;
+                <div className="hotbar-minimal">
+                    {inventory && inventory.slice(0, 10).map((item, index) => {
+                        const slotNumber = index === 9 ? 0 : index + 1;
+                        const isActive = activeHotbarSlot === (index === 9 ? 10 : index + 1);
                         return (
-                            <div key={`hotbar-${index}`} className={`hotbar-slot ${isActive ? 'active' : ''}`}>
-                                <div className="hotbar-number">{slotNumber}</div>
-                                {item ? (
-                                    <>
-                                        <div className="hotbar-icon">
-                                            {item.icon ? item.icon : <div style={{ width: 16, height: 16, borderRadius: '50%', backgroundColor: item.color || '#fff' }}></div>}
-                                        </div>
-                                        <div className="hotbar-name">{item.name || item.type}</div>
-                                    </>
-                                ) : null}
+                            <div key={`hotbar-${index}`} className={`hotbar-slot-minimal ${isActive ? 'active' : ''}`}>
+                                <div className="hotbar-num">{slotNumber}</div>
+                                {item && (
+                                    <div className="hotbar-item-icon" style={{ backgroundColor: `${item.color}22`, border: `1px solid ${item.color}44`, padding: 0 }}>
+                                        <ItemImage item={item} size="80%" />
+                                    </div>
+                                )}
                             </div>
                         );
                     })}
@@ -209,32 +295,32 @@ export function SettingsMenu({ settings, setSettings, onUpdate, onClose }) {
     return (
         <div className="settings-overlay">
             <div className="settings-panel glass-panel">
-                <div className="badge">SYSTEM SETTINGS</div>
-                <h1 style={{ margin: '10px 0 30px 0' }}>FACTORY CONFIG</h1>
+                <div className="badge">시스템 설정</div>
+                <h1 style={{ margin: '10px 0 30px 0' }}>공장 구성 설정</h1>
 
                 <div className="settings-grid">
                     {/* Perspective */}
                     <div className="setting-item">
-                        <label>VIEW PERSPECTIVE</label>
+                        <label>시점 설정</label>
                         <div className="toggle-group">
                             <button
                                 className={settings.perspective === 'first' ? 'active' : ''}
                                 onClick={() => handleChange('perspective', 'first')}
                             >
-                                1ST PERSON
+                                1인칭 시점
                             </button>
                             <button
                                 className={settings.perspective === 'third' ? 'active' : ''}
                                 onClick={() => handleChange('perspective', 'third')}
                             >
-                                3RD PERSON
+                                3인칭 시점
                             </button>
                         </div>
                     </div>
 
                     {/* Mouse Sensitivity */}
                     <div className="setting-item">
-                        <label>MOUSE SENSITIVITY: {settings.sensitivity.toFixed(1)}</label>
+                        <label>마우스 감도: {settings.sensitivity.toFixed(1)}</label>
                         <input
                             type="range"
                             min="0.1"
@@ -247,7 +333,7 @@ export function SettingsMenu({ settings, setSettings, onUpdate, onClose }) {
 
                     {/* FOV / Zoom */}
                     <div className="setting-item">
-                        <label>CAMERA ZOOM (FOV): {settings.zoom}</label>
+                        <label>카메라 줌 (FOV): {settings.zoom}</label>
                         <input
                             type="range"
                             min="30"
@@ -258,29 +344,42 @@ export function SettingsMenu({ settings, setSettings, onUpdate, onClose }) {
                         />
                     </div>
 
+                    {/* Master Volume */}
+                    <div className="setting-item">
+                        <label>마스터 볼륨: {settings.volume}%</label>
+                        <input
+                            type="range"
+                            min="0"
+                            max="100"
+                            step="1"
+                            value={settings.volume}
+                            onChange={(e) => handleChange('volume', parseInt(e.target.value))}
+                        />
+                    </div>
+
                     {/* Graphics Quality */}
                     <div className="setting-item">
-                        <label>GRAPHICS QUALITY</label>
+                        <label>그래픽 품질</label>
                         <div className="toggle-group">
                             <button
                                 className={settings.graphicsQuality === 'low' ? 'active' : ''}
                                 onClick={() => handleChange('graphicsQuality', 'low')}
                             >
-                                PERFORMANCE
+                                성능 우선
                             </button>
                             <button
                                 className={settings.graphicsQuality === 'high' ? 'active' : ''}
                                 onClick={() => handleChange('graphicsQuality', 'high')}
                             >
-                                ULTRA (RTX)
+                                최고 품질
                             </button>
                         </div>
                     </div>
                 </div>
 
                 <div className="settings-footer">
-                    <button className="primary-button" onClick={onClose}>APPLY & CLOSE</button>
-                    <div className="close-hint">PRESS ESC TO RETURN</div>
+                    <button className="primary-button" onClick={onClose}>설정 적용 및 닫기</button>
+                    <div className="close-hint">ESC를 누르면 게임으로 돌아갑니다</div>
                 </div>
             </div>
         </div>
@@ -288,24 +387,6 @@ export function SettingsMenu({ settings, setSettings, onUpdate, onClose }) {
 }
 
 // 4. 건축 목록 창 (Build Inventory UI)
-export const BUILD_CATALOG = [
-    { id: "CONVEYOR", name: "Conveyor Belt", category: "Logistics", icon: "🛤️", color: "#00ffcc" },
-    { id: "SORTING", name: "Sorting Machine", category: "Machines", icon: "⚙️", color: "#55aaff" },
-    { id: "CRUSHING", name: "Crusher", category: "Machines", icon: "🔨", color: "#55aaff" },
-    { id: "CLEANING", name: "Cleaner", category: "Machines", icon: "💦", color: "#55aaff" },
-    { id: "DRYING", name: "Dryer", category: "Machines", icon: "♨️", color: "#55aaff" },
-    { id: "PACKAGING", name: "Packager", category: "Machines", icon: "📦", color: "#55aaff" },
-    { id: "SHIPPING_BIN", name: "Sell Zone", category: "Machines", icon: "💲", color: "#4caf50" },
-
-    { id: "SHELF", name: "Steel Shelf", category: "Props", icon: "🗄️", color: "#ffaa00" },
-    { id: "CRATE", name: "Storage Crate", category: "Props", icon: "🧰", color: "#ffaa00" },
-    { id: "BARREL", name: "Gas Barrel", category: "Props", icon: "🛢️", color: "#ffaa00" },
-    { id: "WALL", name: "Factory Wall", category: "Props", icon: "🧱", color: "#ffaa00" },
-
-    { id: "ITEM_PLASTIC", name: "Plastic Trash", category: "Items", icon: "🥤", color: "#88ff44" },
-    { id: "ITEM_CAN", name: "Can Trash", category: "Items", icon: "🥫", color: "#88ff44" },
-    { id: "ITEM_GLASS", name: "Glass Trash", category: "Items", icon: "🍾", color: "#88ff44" },
-];
 
 export function BuildInventory({ isOpen, onClose, onSelectItem, inventory, activeHotbarSlot, onSlotClick }) {
     if (!isOpen) return null;
@@ -314,26 +395,40 @@ export function BuildInventory({ isOpen, onClose, onSelectItem, inventory, activ
             <div className="storage-grid glass-panel" style={{ width: '800px', height: 'auto', maxHeight: '90vh' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                     <div>
-                        <h2 style={{ margin: 0, letterSpacing: '4px' }}>BUILD CATALOG</h2>
-                        <p style={{ margin: '5px 0 0 0', fontSize: '12px', opacity: 0.5 }}>Select an item to equip to slot {activeHotbarSlot}</p>
+                        <h2 style={{ margin: 0, letterSpacing: '4px' }}>설비 카탈로그</h2>
+                        <p style={{ margin: '5px 0 0 0', fontSize: '12px', opacity: 0.5 }}>슬롯 {activeHotbarSlot}에 장착할 아이템을 선택하세요</p>
                     </div>
                     <button onClick={onClose} style={{ background: 'none', color: '#ff4444', border: 'none', fontSize: '20px', cursor: 'pointer' }}>✖</button>
                 </div>
-                
+
                 {/* Catalog Section */}
                 <div style={{ marginBottom: '30px' }}>
-                    <div className="inventory-title">AVAILABLE ITEMS</div>
-                    <div className="grid-layout" style={{ gridTemplateColumns: 'repeat(7, 1fr)', gap: '10px' }}>
-                        {BUILD_CATALOG.map(item => (
-                            <div
-                                key={item.id}
-                                className="grid-slot"
-                                onClick={() => onSelectItem(item.id)}
-                                style={{ height: '70px', cursor: 'pointer' }}
-                            >
-                                <div className="item-preview">
-                                    <span style={{ fontSize: '20px' }}>{item.icon}</span>
-                                    <span style={{ fontSize: '9px', textAlign: 'center' }}>{item.name}</span>
+                    <div className="inventory-title">엔지니어링 카탈로그</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                        {['물류', '공정 기계', '조형물', '원재료'].map(cat => (
+                            <div key={cat}>
+                                <div style={{ fontSize: '10px', color: 'var(--accent)', marginBottom: '8px', opacity: 0.8, letterSpacing: '1px', fontWeight: 'bold' }}>{cat.toUpperCase()}</div>
+                                <div className="grid-layout" style={{ gridTemplateColumns: 'repeat(7, 1fr)', gap: '10px', marginTop: 0 }}>
+                                    {BUILD_CATALOG.filter(i => i.category === cat).map(item => (
+                                        <div
+                                            key={item.id}
+                                            className="grid-slot"
+                                            onClick={() => onSelectItem(item.id)}
+                                            draggable={true}
+                                            onDragStart={(e) => {
+                                                e.dataTransfer.setData('itemId', item.id);
+                                                e.dataTransfer.setData('type', 'catalog');
+                                            }}
+                                            style={{ height: '75px', cursor: 'grab', position: 'relative' }}
+                                        >
+                                            <div className="item-preview">
+                                                <div className="icon-chip" style={{ backgroundColor: `${item.color}22`, borderColor: `${item.color}44` }}>
+                                                    <ItemImage item={item} size="70%" />
+                                                </div>
+                                                <span style={{ fontSize: '9px', textAlign: 'center', marginTop: '4px', whiteSpace: 'nowrap', fontWeight: 'bold' }}>{item.name}</span>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         ))}
@@ -342,39 +437,56 @@ export function BuildInventory({ isOpen, onClose, onSelectItem, inventory, activ
 
                 {/* Current Inventory Section */}
                 <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}>
-                    <div className="inventory-title">YOUR SLOTS (ACTIVE: {activeHotbarSlot})</div>
-                    <div className="grid-layout" style={{ gridTemplateColumns: 'repeat(8, 1fr)', gap: '10px' }}>
-                        {[...Array(16)].map((_, i) => (
+                    <div className="inventory-title">활성화 건축 바 (슬롯 1-10)</div>
+                    <div className="grid-layout" style={{ gridTemplateColumns: 'repeat(10, 1fr)', gap: '10px' }}>
+                        {[...Array(10)].map((_, i) => (
                             <div
                                 key={`build-inv-${i}`}
-                                className={`grid-slot ${activeHotbarSlot === i + 1 ? 'active' : ''}`}
+                                className={`grid-slot ${activeHotbarSlot === (i === 9 ? 10 : i + 1) ? 'active' : ''}`}
                                 onClick={() => onSlotClick && onSlotClick(i)}
-                                style={{ 
+                                onDragOver={(e) => e.preventDefault()}
+                                onDrop={(e) => {
+                                    e.preventDefault();
+                                    const type = e.dataTransfer.getData('type');
+                                    if (type === 'catalog') {
+                                        const itemId = e.dataTransfer.getData('itemId');
+                                        onSelectItem(itemId, i);
+                                    } else if (type === 'build-storage') {
+                                        const sourceIdx = e.dataTransfer.getData('sourceIdx');
+                                        onSlotClick(i, parseInt(sourceIdx));
+                                    }
+                                }}
+                                draggable={!!(inventory && inventory[i])}
+                                onDragStart={(e) => {
+                                    e.dataTransfer.setData('sourceIdx', i);
+                                    e.dataTransfer.setData('type', 'build-storage');
+                                }}
+                                style={{
                                     height: '70px',
                                     cursor: 'pointer',
-                                    border: i < 8 ? '2px solid rgba(0, 255, 204, 0.3)' : '1px solid rgba(255,255,255,0.1)',
-                                    background: activeHotbarSlot === i + 1 ? 'rgba(0, 255, 204, 0.1)' : undefined
+                                    border: `2px solid ${activeHotbarSlot === (i === 9 ? 10 : i + 1) ? 'var(--accent)' : 'rgba(255,255,255,0.1)'}`,
+                                    background: activeHotbarSlot === (i === 9 ? 10 : i + 1) ? 'var(--accent-glow)' : undefined
                                 }}
                             >
                                 {inventory && inventory[i] ? (
-                                    <div className="item-preview">
-                                        <span style={{ fontSize: '20px' }}>{inventory[i].icon}</span>
-                                        <span style={{ fontSize: '8px' }}>{inventory[i].name}</span>
+                                    <div className="item-preview" style={{ width: '100%', height: '100%' }}>
+                                        <div style={{ height: '35px', marginTop: '5px' }}>
+                                            <ItemImage item={inventory[i]} size="100%" />
+                                        </div>
+                                        <span style={{ fontSize: '8px', opacity: 0.7, marginTop: '2px' }}>{inventory[i].name}</span>
                                     </div>
                                 ) : (
-                                    <span style={{ opacity: 0.2 }}>{i < 8 ? i + 1 : ''}</span>
+                                    <span style={{ opacity: 0.15, fontSize: '18px', fontWeight: '900' }}>{i === 9 ? 0 : i + 1}</span>
                                 )}
                             </div>
                         ))}
                     </div>
                 </div>
 
-                <div className="close-hint" style={{ marginTop: '20px' }}>
-                    CLICK A SLOT BELOW TO CHOOSE, THEN CLICK ITEM ABOVE TO EQUIP • V TO CLOSE
+                <div className="close-hint" style={{ marginTop: '25px', color: 'var(--accent)', opacity: 0.8 }}>
+                    하단의 슬롯을 먼저 선택한 후 상단 카탈로그에서 유닛을 골라주세요 • [V]키를 눌러 닫기
                 </div>
             </div>
         </div>
     );
 }
-
-
