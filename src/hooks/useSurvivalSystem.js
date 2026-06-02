@@ -2,11 +2,24 @@ import { useState, useEffect, useRef } from 'react';
 
 const OXYGEN_STATION_POS = [-3.5, 0, 8.0];
 
+export const getTaxAmount = (day) => {
+    switch (day) {
+        case 0: return 0;
+        case 1: return 100;
+        case 2: return 250;
+        case 3: return 450;
+        case 4: return 700;
+        case 5: return 1000;
+        default: return 0;
+    }
+};
+
 /**
- * 1안: 슈트 산소 필터 서바이벌 시스템 및 충전 스테이션 상호작용 관련 비즈니스 로직을 분리한 커스텀 훅입니다.
+ * 0일차(튜토리얼) + 5일 차 진행 및 산소 필터 서바이벌 시스템 비즈니스 로직을 총괄하는 커스텀 훅입니다.
  */
 export function useSurvivalSystem({
     gameState,
+    setGameState,
     money,
     setMoney,
     setNormalInventory,
@@ -20,6 +33,15 @@ export function useSurvivalSystem({
     const [chargeConfirm, setChargeConfirm] = useState(false);
     const confirmTimeoutRef = useRef(null);
 
+    // 일차 및 시간 시스템 상태
+    const [currentDay, setCurrentDay] = useState(0); // 0일차(튜토리얼)로 시작
+    const [gameHour, setGameHour] = useState(8);      // 오전 8시 시작
+    const [gameMinute, setGameMinute] = useState(0);
+    const [shippedPurifierCore, setShippedPurifierCore] = useState(false); // 5일차 전용 목표
+
+    // 인게임 튜토리얼 단계 (0일차에 활성화)
+    const [tutorialStep, setTutorialStep] = useState('pick_up'); // 'pick_up' -> 'equip' -> 'place_belt' -> 'completed'
+
     // 공장 내부 범위 체크 (x: -12.5 ~ 19.5, z: -12.5 ~ 9.5)
     const checkIsInsideFactory = (x, z) => {
         return x >= -12.5 && x <= 19.5 && z >= -12.5 && z <= 9.5;
@@ -29,22 +51,35 @@ export function useSurvivalSystem({
     useEffect(() => {
         if (gameState !== 'playing' || isCompromised) return;
 
+        // 0일차(튜토리얼)에는 산소 무제한
+        if (currentDay === 0) {
+            setOxygen(100);
+            return;
+        }
+
         const interval = setInterval(() => {
             const [px, , pz] = playerPositionRef.current;
             const isInside = checkIsInsideFactory(px, pz);
 
             setOxygen(prev => {
+                let drain = 0;
                 if (isInside) {
-                    // 공장 내부에서는 산소가 자동으로 차지 않고 유지됨
-                    return prev;
+                    // 일차가 지날수록 공장 내부의 공기도 탁해집니다.
+                    if (currentDay === 2) drain = 0.3;
+                    else if (currentDay === 3) drain = 0.4;
+                    else if (currentDay >= 4) drain = 0.6;
                 } else {
-                    // 미로 골목에서는 서서히 방전 (-1.5%씩)
-                    const nextOxy = Math.max(0, prev - 1.5);
-                    if (nextOxy === 0) {
-                        setIsCompromised(true);
-                    }
-                    return nextOxy;
+                    // 외부 미로에서는 고독성으로 인해 산소 급감
+                    if (currentDay === 1) drain = 1.5;
+                    else if (currentDay === 2 || currentDay === 3) drain = 1.8;
+                    else if (currentDay >= 4) drain = 2.25;
                 }
+
+                const nextOxy = Math.max(0, prev - drain);
+                if (nextOxy === 0) {
+                    setIsCompromised(true);
+                }
+                return nextOxy;
             });
 
             // 플레이어가 충전기에서 멀어지면 확인 상태를 해제
@@ -55,7 +90,74 @@ export function useSurvivalSystem({
         }, 1000);
 
         return () => clearInterval(interval);
-    }, [gameState, isCompromised, playerPositionRef]);
+    }, [gameState, isCompromised, currentDay, playerPositionRef]);
+
+    // 게임 내 하루 시간 흐름 루프 (Day 1~5일 때 작동, 1.5초마다 10분 증가)
+    useEffect(() => {
+        if (gameState !== 'playing' || isCompromised || currentDay === 0) return;
+
+        const timeInterval = setInterval(() => {
+            setGameMinute(prevMin => {
+                let nextMin = prevMin + 10;
+                if (nextMin >= 60) {
+                    nextMin = 0;
+                    setGameHour(prevHour => {
+                        let nextHour = prevHour + 1;
+                        if (nextHour >= 24) {
+                            return 24; // useEffect에서 24 감지 후 처리하도록 유지
+                        }
+                        return nextHour;
+                    });
+                }
+                return nextMin;
+            });
+        }, 1500);
+
+        return () => clearInterval(timeInterval);
+    }, [gameState, isCompromised, currentDay]);
+
+    // 자정(24:00) 평가 루프
+    useEffect(() => {
+        if (gameState !== 'playing' || currentDay === 0) return;
+
+        if (gameHour === 24) {
+            // 시간 초기화 및 일차 평가 진행
+            setGameHour(8);
+            setGameMinute(0);
+
+            const tax = getTaxAmount(currentDay);
+
+            setMoney(prevMoney => {
+                if (prevMoney >= tax) {
+                    if (currentDay === 5) {
+                        // 5일차 최종 클리어 검증
+                        if (shippedPurifierCore) {
+                            setGameState('outro'); // 엔딩 아웃트로 시작!
+                            return prevMoney - tax;
+                        } else {
+                            setResults(prev => ["[체납 실패] Day 5 최종 목표 미달: '대기 정화 코어'를 제작하여 배송함에 투입해야 합니다. 5일차가 재설정됩니다.", ...prev].slice(0, 5));
+                            setOxygen(100);
+                            return prevMoney;
+                        }
+                    } else {
+                        // 다음 날로 전진
+                        setResults(prev => [`[납부 성공] Day ${currentDay} 산소 구독세 $${tax}을 납부했습니다! 다음 일차(Day ${currentDay + 1})로 이동합니다.`, ...prev].slice(0, 5));
+                        setCurrentDay(d => d + 1);
+                        setOxygen(100);
+                        setShippedPurifierCore(false);
+                        return prevMoney - tax;
+                    }
+                } else {
+                    // 세금 체납 시 하루 초기화 및 20% 벌금
+                    const penalty = Math.floor(tax * 0.2);
+                    setResults(prev => [`[체납 실패] Day ${currentDay} 세금 $${tax}을 내지 못했습니다! 슈트 압수 벌금 -$${penalty}이 부과되며 하루가 재설정됩니다.`, ...prev].slice(0, 5));
+                    setOxygen(100);
+                    setShippedPurifierCore(false);
+                    return Math.max(0, prevMoney - penalty);
+                }
+            });
+        }
+    }, [gameHour, currentDay, gameState, shippedPurifierCore, setGameState, setMoney, setResults]);
 
     // 슈트 긴급 리부트 함수
     const handleReboot = () => {
@@ -80,15 +182,14 @@ export function useSurvivalSystem({
         setChargeConfirm(false);
     };
 
-    // 산소 충전기 상호작용 (확인 절차 포함)
+    // 산소 충전기 상호작용
     const handleChargeInteraction = () => {
         const [px, , pz] = playerPositionRef.current;
         const dist = Math.sqrt(Math.pow(px - OXYGEN_STATION_POS[0], 2) + Math.pow(pz - OXYGEN_STATION_POS[2], 2));
         
-        if (dist >= 3.0) return false; // 상호작용 거리가 아님
+        if (dist >= 3.0) return false;
 
         if (!chargeConfirm) {
-            // 1단계: 충전 질문 메시지 출력
             setChargeConfirm(true);
             setResults(prev => ["[충전 대기] 충전하시겠습니까? (비용: $10) [E/F]를 한 번 더 누르면 충전됩니다.", ...prev].slice(0, 5));
             
@@ -99,18 +200,14 @@ export function useSurvivalSystem({
                 position: [OXYGEN_STATION_POS[0], 2.4, OXYGEN_STATION_POS[2]] 
             }]);
 
-            // 4초 후 자동 취소
             if (confirmTimeoutRef.current) clearTimeout(confirmTimeoutRef.current);
             confirmTimeoutRef.current = setTimeout(() => {
                 setChargeConfirm(false);
                 setWorldAlerts(prev => prev.filter(a => a.id !== alertId));
             }, 4000);
         } else {
-            // 2단계: 실제 충전 및 확인 메시지 출력
             setChargeConfirm(false);
             if (confirmTimeoutRef.current) clearTimeout(confirmTimeoutRef.current);
-            
-            // 월드 얼럿 클리어
             setWorldAlerts(prev => prev.filter(a => !a.text.includes("충전하시겠습니까")));
 
             setMoney(prevMoney => {
@@ -152,12 +249,27 @@ export function useSurvivalSystem({
         setOxygen(100);
         setIsCompromised(false);
         setChargeConfirm(false);
+        setCurrentDay(0);
+        setGameHour(8);
+        setGameMinute(0);
+        setShippedPurifierCore(false);
+        setTutorialStep('pick_up');
     };
 
     return {
         oxygen,
         isCompromised,
         chargeConfirm,
+        currentDay,
+        setCurrentDay,
+        gameHour,
+        setGameHour,
+        gameMinute,
+        setGameMinute,
+        shippedPurifierCore,
+        setShippedPurifierCore,
+        tutorialStep,
+        setTutorialStep,
         handleReboot,
         handleChargeInteraction,
         resetSystem

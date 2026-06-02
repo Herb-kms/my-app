@@ -1005,3 +1005,169 @@ body {
     opacity: 1.0;
   }
 }
+
+/* Day/Time Clock Widget */
+.day-time-widget {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: rgba(10, 10, 15, 0.55);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 10px 24px;
+  border-radius: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  pointer-events: auto;
+}
+
+.day-badge {
+  font-weight: 900;
+  color: var(--accent);
+  letter-spacing: 1px;
+  font-size: 14px;
+  text-transform: uppercase;
+}
+
+.time-badge {
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 18px;
+  color: #fff;
+}
+
+.tax-badge {
+  font-size: 12px;
+  font-weight: 800;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 4px 12px;
+  border-radius: 15px;
+}
+
+/* In-game Tutorial Guide Bar */
+.tutorial-guide-bar {
+  position: absolute;
+  top: 110px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 500px;
+  max-width: 90vw;
+  background: rgba(10, 10, 15, 0.7);
+  border: 1px solid rgba(0, 255, 204, 0.3);
+  box-shadow: 0 0 15px rgba(0, 255, 204, 0.15);
+  padding: 15px 25px;
+  border-radius: 12px;
+  z-index: 100;
+  animation: fadeInDown 0.4s ease-out;
+}
+
+.tutorial-title {
+  font-size: 11px;
+  font-weight: 900;
+  color: var(--accent);
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.tutorial-step-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: #fff;
+  line-height: 1.5;
+}
+
+.tutorial-step-content .emoji {
+  font-size: 20px;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* Ending Outro Overlay */
+.ending-outro-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle, rgba(10, 20, 15, 0.98) 0%, rgba(5, 5, 5, 1) 100%);
+  z-index: 10000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: auto;
+}
+
+.ending-outro-content {
+  width: 600px;
+  max-width: 90vw;
+  padding: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid rgba(0, 255, 204, 0.25);
+  box-shadow: 0 0 40px rgba(0, 255, 204, 0.1);
+  text-align: center;
+}
+
+.ending-title {
+  font-size: 32px;
+  letter-spacing: 3px;
+  background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-top: 0;
+  margin-bottom: 30px;
+  text-shadow: 0 0 15px rgba(0, 255, 204, 0.35);
+}
+
+.ending-body-text {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #ddd;
+  margin-bottom: 40px;
+  text-align: left;
+  width: 100%;
+}
+
+.ending-body-text p {
+  margin: 10px 0;
+}
+
+.ending-body-text .font-highlight {
+  color: var(--accent);
+  font-size: 16px;
+  text-shadow: 0 0 8px rgba(0, 255, 204, 0.25);
+}
+
+.ending-exit-btn {
+  background: linear-gradient(135deg, var(--accent) 0%, #00bb88 100%);
+  color: #000;
+  border: none;
+  padding: 15px 40px;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  border-radius: 30px;
+  cursor: pointer;
+  box-shadow: 0 0 20px var(--accent-glow);
+  transition: all 0.2s;
+}
+
+.ending-exit-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 30px rgba(0, 255, 204, 0.7);
+}

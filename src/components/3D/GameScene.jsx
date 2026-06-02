@@ -136,6 +136,42 @@ function ViewAlignedAlert({ text }) {
 /**
  * 실제 3D 공간을 구성하고 모든 물리 엔진, 빛, 배경, 기계, 아이템, 플레이어를 배치하는 핵심 컴포넌트입니다.
  */
+function GuideBeacon({ position, color = "#00ffcc" }) {
+    return (
+        <group position={position}>
+            {/* 빛기둥 (반투명 실린더) */}
+            <mesh position={[0, 3, 0]}>
+                <cylinderGeometry args={[0.2, 0.2, 6, 16, 1, true]} />
+                <meshBasicMaterial 
+                    color={color} 
+                    transparent 
+                    opacity={0.25} 
+                    side={THREE.DoubleSide} 
+                    depthWrite={false}
+                />
+            </mesh>
+            {/* 바닥 원형 가이드 링 */}
+            <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 0]}>
+                <ringGeometry args={[0.0, 0.8, 32]} />
+                <meshBasicMaterial 
+                    color={color} 
+                    transparent 
+                    opacity={0.4} 
+                    side={THREE.DoubleSide} 
+                    depthWrite={false}
+                />
+            </mesh>
+            {/* 허공의 3D 안내 화살표 */}
+            <Float speed={3} rotationIntensity={0} floatIntensity={0.2} position={[0, 4.5, 0]}>
+                <mesh rotation={[0, 0, Math.PI]}>
+                    <coneGeometry args={[0.3, 0.6, 4]} />
+                    <meshBasicMaterial color={color} />
+                </mesh>
+            </Float>
+        </group>
+    );
+}
+
 export function GameScene({
     settings,
     items,
@@ -156,6 +192,8 @@ export function GameScene({
     isInventoryOpen,
     isSettingsOpen,
     isBuildInventoryOpen,
+    currentDay = 0,
+    tutorialStep = 'pick_up'
 }) {
     // UI 창이 하나라도 열려있으면 마우스 조작이나 카메라 이동을 막기 위한 상태
     const isUIOpen = isInventoryOpen || isSettingsOpen || isBuildInventoryOpen;
@@ -258,6 +296,14 @@ export function GameScene({
                             onPlaceItem={onPlaceItem}
                             onDemolishItem={onDemolishItem}
                         />
+
+                        {/* 0일차 튜토리얼 안내용 3D 가이드 비컨 */}
+                        {currentDay === 0 && tutorialStep === 'pick_up' && (
+                            <GuideBeacon position={[10, 0, 8]} color="#00ffcc" />
+                        )}
+                        {currentDay === 0 && tutorialStep === 'place_belt' && (
+                            <GuideBeacon position={[15, 0, 5]} color="#ffcc00" />
+                        )}
                     </Physics>
                 </Suspense>
 
