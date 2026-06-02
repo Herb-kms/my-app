@@ -75,7 +75,7 @@ export function OverlayUI({
             {gameState === 'playing' && (
                 <div className="day-time-widget glass-panel">
                     <div className="day-badge">
-                        {currentDay === 0 ? 'TUTORIAL (0일차)' : `DAY ${currentDay}`}
+                        {currentDay === 0 ? '0일차 (튜토리얼)' : `DAY ${currentDay}`}
                     </div>
                     <div className={`time-badge ${timeRemaining < 30 && currentDay > 0 ? 'time-warning-pulse' : ''}`} style={{ transition: 'all 0.3s' }}>
                         ⏰ {currentDay === 0 ? "시간 무제한" : `남은 시간: ${formatTime(timeRemaining)}`}
