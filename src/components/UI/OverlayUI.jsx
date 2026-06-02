@@ -30,8 +30,7 @@ export function OverlayUI({
     isCompromised = false,
     handleReboot,
     currentDay = 0,
-    gameHour = 8,
-    gameMinute = 0,
+    timeRemaining = 120,
     shippedPurifierCore = false,
     tutorialStep = 'pick_up',
     setTutorialStep
@@ -43,6 +42,13 @@ export function OverlayUI({
 
     const { isProcessing, processingItems, STAGES } = hudInfo || {};
     const selectedItem = currentInventory ? currentInventory[activeHotbarSlot - 1] : null;
+
+    const formatTime = (time) => {
+        if (time > 9999) return "∞";
+        const mins = Math.floor(time / 60);
+        const secs = time % 60;
+        return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    };
 
     return (
         <>
@@ -71,8 +77,8 @@ export function OverlayUI({
                     <div className="day-badge">
                         {currentDay === 0 ? 'TUTORIAL (0일차)' : `DAY ${currentDay}`}
                     </div>
-                    <div className="time-badge">
-                        ⏰ {String(gameHour).padStart(2, '0')}:{String(gameMinute).padStart(2, '0')}
+                    <div className={`time-badge ${timeRemaining < 30 && currentDay > 0 ? 'time-warning-pulse' : ''}`} style={{ transition: 'all 0.3s' }}>
+                        ⏰ {currentDay === 0 ? "시간 무제한" : `남은 시간: ${formatTime(timeRemaining)}`}
                     </div>
                     <div className="tax-badge" style={{ color: money >= getTaxAmount(currentDay) ? '#00ffcc' : '#ff4444' }}>
                         {currentDay === 0 ? (

@@ -14,6 +14,18 @@ export const getTaxAmount = (day) => {
     }
 };
 
+export const getDayDuration = (day) => {
+    switch (day) {
+        case 0: return 999999; // 0일차는 무제한
+        case 1: return 120;    // 1일차 2분
+        case 2: return 180;    // 2일차 3분
+        case 3: return 240;    // 3일차 4분 (고정)
+        case 4: return 240;    // 4일차 4분 (고정)
+        case 5: return 240;    // 5일차 4분 (고정)
+        default: return 240;
+    }
+};
+
 /**
  * 0일차(튜토리얼) + 5일 차 진행 및 산소 필터 서바이벌 시스템 비즈니스 로직을 총괄하는 커스텀 훅입니다.
  */
@@ -33,10 +45,9 @@ export function useSurvivalSystem({
     const [chargeConfirm, setChargeConfirm] = useState(false);
     const confirmTimeoutRef = useRef(null);
 
-    // 일차 및 시간 시스템 상태
+    // 일차 및 시간 시스템 상태 (카운트다운 타이머 방식)
     const [currentDay, setCurrentDay] = useState(0); // 0일차(튜토리얼)로 시작
-    const [gameHour, setGameHour] = useState(8);      // 오전 8시 시작
-    const [gameMinute, setGameMinute] = useState(0);
+    const [timeRemaining, setTimeRemaining] = useState(999999); // 남은 시간 (초)
     const [shippedPurifierCore, setShippedPurifierCore] = useState(false); // 5일차 전용 목표
 
     // 인게임 튜토리얼 단계 (0일차에 활성화)
@@ -90,42 +101,32 @@ export function useSurvivalSystem({
         }, 1000);
 
         return () => clearInterval(interval);
-    }, [gameState, isCompromised, currentDay, playerPositionRef]);
+    }, [gameState, isCompromised, currentDay, playerPositionRef, setOxygen, setIsCompromised]);
 
-    // 게임 내 하루 시간 흐름 루프 (Day 1~5일 때 작동, 1.5초마다 10분 증가)
+    // 게임 내 하루 시간 흐름 루프 (Day 1~5일 때 작동, 1초마다 남은 시간 1초 감소)
     useEffect(() => {
         if (gameState !== 'playing' || isCompromised || currentDay === 0) return;
 
         const timeInterval = setInterval(() => {
-            setGameMinute(prevMin => {
-                let nextMin = prevMin + 10;
-                if (nextMin >= 60) {
-                    nextMin = 0;
-                    setGameHour(prevHour => {
-                        let nextHour = prevHour + 1;
-                        if (nextHour >= 24) {
-                            return 24; // useEffect에서 24 감지 후 처리하도록 유지
-                        }
-                        return nextHour;
-                    });
+            setTimeRemaining(prev => {
+                const nextTime = prev - 1;
+                if (nextTime <= 0) {
+                    return 0; // useEffect에서 0 감지 후 세금 납부 평가 진행
                 }
-                return nextMin;
+                return nextTime;
             });
-        }, 1500);
+        }, 1000);
 
         return () => clearInterval(timeInterval);
-    }, [gameState, isCompromised, currentDay]);
+    }, [gameState, isCompromised, currentDay, setTimeRemaining]);
 
-    // 자정(24:00) 평가 루프
+    // 제한시간 만료 (timeRemaining === 0) 시 세금 납부 및 일차 정산 평가 루프
     useEffect(() => {
         if (gameState !== 'playing' || currentDay === 0) return;
 
-        if (gameHour === 24) {
-            // 시간 초기화 및 일차 평가 진행
-            setGameHour(8);
-            setGameMinute(0);
-
+        if (timeRemaining === 0) {
             const tax = getTaxAmount(currentDay);
+            const duration = getDayDuration(currentDay);
 
             setMoney(prevMoney => {
                 if (prevMoney >= tax) {
@@ -137,12 +138,15 @@ export function useSurvivalSystem({
                         } else {
                             setResults(prev => ["[체납 실패] Day 5 최종 목표 미달: '대기 정화 코어'를 제작하여 배송함에 투입해야 합니다. 5일차가 재설정됩니다.", ...prev].slice(0, 5));
                             setOxygen(100);
+                            setTimeRemaining(duration);
                             return prevMoney;
                         }
                     } else {
                         // 다음 날로 전진
-                        setResults(prev => [`[납부 성공] Day ${currentDay} 산소 구독세 $${tax}을 납부했습니다! 다음 일차(Day ${currentDay + 1})로 이동합니다.`, ...prev].slice(0, 5));
-                        setCurrentDay(d => d + 1);
+                        const nextD = currentDay + 1;
+                        setResults(prev => [`[납부 성공] Day ${currentDay} 산소 구독세 $${tax}을 납부했습니다! 다음 일차(Day ${nextD})로 이동합니다.`, ...prev].slice(0, 5));
+                        setCurrentDay(nextD);
+                        setTimeRemaining(getDayDuration(nextD));
                         setOxygen(100);
                         setShippedPurifierCore(false);
                         return prevMoney - tax;
@@ -153,11 +157,12 @@ export function useSurvivalSystem({
                     setResults(prev => [`[체납 실패] Day ${currentDay} 세금 $${tax}을 내지 못했습니다! 슈트 압수 벌금 -$${penalty}이 부과되며 하루가 재설정됩니다.`, ...prev].slice(0, 5));
                     setOxygen(100);
                     setShippedPurifierCore(false);
+                    setTimeRemaining(duration);
                     return Math.max(0, prevMoney - penalty);
                 }
             });
         }
-    }, [gameHour, currentDay, gameState, shippedPurifierCore, setGameState, setMoney, setResults]);
+    }, [timeRemaining, currentDay, gameState, shippedPurifierCore, setGameState, setMoney, setResults, setOxygen, setTimeRemaining, setShippedPurifierCore, setCurrentDay]);
 
     // 슈트 긴급 리부트 함수
     const handleReboot = () => {
@@ -250,8 +255,7 @@ export function useSurvivalSystem({
         setIsCompromised(false);
         setChargeConfirm(false);
         setCurrentDay(0);
-        setGameHour(8);
-        setGameMinute(0);
+        setTimeRemaining(999999);
         setShippedPurifierCore(false);
         setTutorialStep('pick_up');
     };
@@ -262,10 +266,8 @@ export function useSurvivalSystem({
         chargeConfirm,
         currentDay,
         setCurrentDay,
-        gameHour,
-        setGameHour,
-        gameMinute,
-        setGameMinute,
+        timeRemaining,
+        setTimeRemaining,
         shippedPurifierCore,
         setShippedPurifierCore,
         tutorialStep,

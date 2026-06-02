@@ -99,10 +99,8 @@ function GameContent() {
         isCompromised,
         currentDay,
         setCurrentDay,
-        gameHour,
-        setGameHour,
-        gameMinute,
-        setGameMinute,
+        timeRemaining,
+        setTimeRemaining,
         shippedPurifierCore,
         setShippedPurifierCore,
         tutorialStep,
@@ -385,8 +383,7 @@ function GameContent() {
                         setTutorialStep('completed');
                         setResults(prev => ["★ 튜토리얼 완료! 1일차 가동 시작 (기본 산소 구독세 $100)", ...prev].slice(0, 5));
                         setCurrentDay(1);
-                        setGameHour(8);
-                        setGameMinute(0);
+                        setTimeRemaining(120); // 1일차 120초
                     }
                 }
             }
@@ -435,7 +432,7 @@ function GameContent() {
             window.removeEventListener('keydown', onKeyDown); 
             window.removeEventListener('wheel', onWheel); 
         };
-    }, [gameState, currentDay, isInventoryOpen, isSettingsOpen, isBuildInventoryOpen, handleChargeInteraction, setCurrentDay, setGameHour, setGameMinute, setShippedPurifierCore, setTutorialStep]);
+    }, [gameState, currentDay, isInventoryOpen, isSettingsOpen, isBuildInventoryOpen, handleChargeInteraction, setCurrentDay, setTimeRemaining, setShippedPurifierCore, setTutorialStep]);
 
     // ========================================================================
     // 6. 컴포넌트 렌더링
@@ -494,8 +491,7 @@ function GameContent() {
                 isCompromised={isCompromised}
                 handleReboot={handleReboot}
                 currentDay={currentDay}
-                gameHour={gameHour}
-                gameMinute={gameMinute}
+                timeRemaining={timeRemaining}
                 shippedPurifierCore={shippedPurifierCore}
                 tutorialStep={tutorialStep}
                 setTutorialStep={setTutorialStep}

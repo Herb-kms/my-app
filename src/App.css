@@ -1171,3 +1171,15 @@ body {
   transform: translateY(-3px);
   box-shadow: 0 0 30px rgba(0, 255, 204, 0.7);
 }
+
+/* Time Warning Pulse */
+.time-warning-pulse {
+  color: #ff3366 !important;
+  text-shadow: 0 0 8px rgba(255, 51, 102, 0.6);
+  animation: textPulseBlink 0.8s infinite alternate ease-in-out;
+}
+
+@keyframes textPulseBlink {
+  0% { opacity: 0.6; transform: scale(0.96); }
+  100% { opacity: 1; transform: scale(1.04); }
+}
